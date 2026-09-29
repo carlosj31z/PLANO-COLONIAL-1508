@@ -1,510 +1,657 @@
 #!/usr/bin/env python3
-"""Plano referencial y ficha de inspección - Edificio A, Alto Lima Park Cercado.
+"""Plano de distribución A3 con vista 3D - Alto Lima Park, Edificio A, Dpto. 1508.
 
-Redibujo vectorial del plano anexo (V.02) sin medidas: los campos de cotas
-quedan en blanco para llenarse durante la inspección.
-Uso: python3 generar_plano.py  ->  PLANO_INSPECCION_DPTO_1508.pdf
+Redibujo del plano anexo (V.02). Coordenadas en unidades de dibujo (px del
+plano original), sin medidas reales.
+Uso: python3 generar_plano.py  ->  PLANO_DPTO_1508_A3.pdf
 """
+import heapq
 import math
-from reportlab.lib.pagesizes import A4, landscape
+from reportlab.lib.pagesizes import A3, landscape
 from reportlab.lib.units import mm
-from reportlab.lib.colors import HexColor, white
+from reportlab.lib.colors import HexColor, white, Color
 from reportlab.pdfgen import canvas
 
-OUT = "PLANO_INSPECCION_DPTO_1508.pdf"
-W, H = landscape(A4)
+OUT = "PLANO_DPTO_1508_A3.pdf"
+PW, PH = landscape(A3)
 
 INK = HexColor("#1f2933")
-WALL = HexColor("#2b2f36")
 MUTED = HexColor("#6b7280")
 ACCENT = HexColor("#8a6d3b")
-LINE = HexColor("#c9ced6")
-F_DORM = HexColor("#efe4d2")
-F_LIVING = HexColor("#f6efe3")
-F_WET = HexColor("#dfe9ee")
-F_SERV = HexColor("#e6e6e2")
-F_BALC = HexColor("#d4d8dc")
-FIX = HexColor("#ffffff")
-FIXL = HexColor("#7a828c")
 
-# --- transformación px (plano original) -> puntos PDF -----------------------
-S = 0.262 * mm
-OX, OY = 12 * mm, H - 33 * mm
-PX0, PY0 = 110, 255
+T = 8        # espesor de muro
+WALL_H = 46  # altura de corte de muros en la vista 3D
+SLAB = 16    # espesor de losa
+
+# --------------------------------------------------------------------------
+# Geometría (x hacia la derecha, y hacia abajo en planta; +x = NORTE)
+# --------------------------------------------------------------------------
+boxes = []      # sólidos de la vista 3D
+walls2d = []    # rectángulos de muro para la planta
+wins2d = []     # ventanas / mamparas para la planta
 
 
-def X(px):
-    return OX + (px - PX0) * S
+def box(x1, y1, x2, y2, z0, z1, top, side=None, glass=False, kind="obj"):
+    boxes.append(dict(x1=x1, y1=y1, x2=x2, y2=y2, z0=z0, z1=z1, top=HexColor(top),
+                      side=HexColor(side or top), glass=glass, kind=kind))
 
 
-def Y(py):
-    return OY - (py - PY0) * S
+WALL_TOP, WALL_SIDE = "#2d3138", "#f1eee9"
 
 
-T = 8  # espesor de muro (px)
+def wall(orient, pos, a, b, wins=()):
+    """Muro con vanos: wins = [(a, b, tipo)] tipo 'v' ventana, 'p' baranda."""
+    h = T / 2
+    start = a - h
+    pieces = []
+    for (wa, wb, _t) in sorted(wins):
+        pieces.append((start, wa))
+        start = wb
+    pieces.append((start, b + h))
 
-c = canvas.Canvas(OUT, pagesize=(W, H))
-c.setTitle("Plano referencial de inspección - Dpto. 1508, Edificio A")
-c.setAuthor("Inspección")
+    def rect(p1, p2):
+        return (p1, pos - h, p2, pos + h) if orient == "h" else (pos - h, p1, pos + h, p2)
+
+    for p1, p2 in pieces:
+        if p2 - p1 > 0.5:
+            r = rect(p1, p2)
+            box(*r, 0, WALL_H, WALL_TOP, WALL_SIDE, kind="wall")
+            walls2d.append(r)
+    for (wa, wb, t) in wins:
+        sill = 26 if t == "v" else 22
+        box(*rect(wa, wb), 0, sill, WALL_TOP, WALL_SIDE, kind="wall")
+        g = (wa, pos - 1.2, wb, pos + 1.2) if orient == "h" else (pos - 1.2, wa, pos + 1.2, wb)
+        box(*g, sill, WALL_H if t == "v" else 44, "#a9cfe0", glass=True)
+        wins2d.append((orient, pos, wa, wb))
 
 
-def rect(x1, y1, x2, y2, fill, stroke=None, lw=0.4):
-    c.setFillColor(fill)
-    if stroke:
+# Muros
+wall("h", 262, 205, 515, wins=[(232, 360, "v"), (412, 490, "v")])
+wall("v", 205, 262, 474)
+wall("v", 385, 262, 474)
+wall("v", 515, 262, 474)
+wall("h", 474, 118, 325)
+wall("h", 474, 445, 515)
+wall("h", 262, 519, 702, wins=[(519, 698, "p")])        # baranda del balcón
+wall("v", 702, 262, 410)
+wall("v", 702, 410, 660)
+wall("h", 410, 702, 750)
+wall("v", 750, 388, 410)
+wall("h", 388, 750, 950, wins=[(830, 940, "v")])
+wall("v", 950, 388, 738, wins=[(420, 470, "v")])
+wall("v", 820, 388, 520)
+wall("v", 820, 580, 738)
+wall("h", 640, 820, 835)
+wall("h", 640, 885, 950)
+wall("h", 738, 118, 390)
+wall("h", 738, 440, 755)
+wall("h", 738, 815, 950)
+wall("v", 390, 680, 738)
+wall("v", 440, 680, 738)
+wall("h", 680, 390, 440)
+wall("v", 118, 474, 738, wins=[(520, 640, "v")])
+wall("v", 315, 540, 600)
+wall("v", 315, 650, 738)
+wall("h", 568, 318, 508)
+wall("v", 415, 568, 680)
+wall("v", 508, 568, 590)
+wall("v", 508, 640, 738)
+# Mampara corrediza sala-balcón
+box(519, 318.6, 698, 321.4, 0, WALL_H, "#a9cfe0", glass=True)
+box(519, 317, 523, 323, 0, WALL_H, "#5b6169", kind="wall")
+box(694, 317, 698, 323, 0, WALL_H, "#5b6169", kind="wall")
+wins2d.append(("h", 320, 519, 698))
+
+# Hojas de puerta (abiertas a 90°)
+for r in [(375, 422, 379, 470), (392, 422, 396, 470), (266, 536, 311, 540),
+          (319, 646, 362, 650), (463, 636, 504, 640), (824, 576, 870, 580),
+          (881, 644, 885, 688), (811, 684, 815, 734)]:
+    box(*r, 0, 44, "#cdb893", "#e4d3b7", kind="door")
+
+# Dormitorio 2
+for x1, x2 in ((213, 294), (300, 378)):
+    box(x1, 266, x2, 272, 0, 44, "#6f757c", "#8b9197")
+    box(x1, 272, x2, 385, 0, 20, "#e9ebee", "#c3c8ce")
+    box(x1 + 4, 275, x2 - 4, 293, 20, 26, "#ffffff", "#e3e5e8")
+    box(x1, 318, x2, 385, 20, 23, "#8b9a82", "#76856d")
+box(213, 440, 300, 468, 0, 32, "#4a4f57", "#5f656d")
+# Dormitorio 3
+box(395, 266, 457, 272, 0, 44, "#6f757c", "#8b9197")
+box(395, 272, 457, 385, 0, 20, "#e9ebee", "#c3c8ce")
+box(399, 275, 453, 293, 20, 26, "#ffffff", "#e3e5e8")
+box(395, 318, 457, 385, 20, 23, "#8b9a82", "#76856d")
+box(462, 440, 509, 468, 0, 32, "#4a4f57", "#5f656d")
+# Dormitorio principal
+box(124, 515, 131, 657, 0, 46, "#6f757c", "#8b9197")
+box(131, 515, 245, 657, 0, 21, "#e9ebee", "#c3c8ce")
+box(134, 520, 156, 584, 21, 27, "#ffffff", "#e3e5e8")
+box(134, 588, 156, 652, 21, 27, "#ffffff", "#e3e5e8")
+box(195, 515, 245, 657, 21, 24, "#5d636b", "#4b5057")
+box(123, 494, 141, 512, 0, 24, "#b89a6e", "#a0845b")
+box(123, 660, 141, 678, 0, 24, "#b89a6e", "#a0845b")
+box(122, 690, 312, 734, 0, WALL_H, "#9c8565", "#c9b594")      # clóset
+# Circulación: escritorio
+box(320, 544, 412, 564, 0, 30, "#4a4f57", "#5f656d")
+# Sala
+box(519, 352, 531, 438, 0, 22, "#4a4f57", "#5f656d")
+box(520, 366, 524, 424, 22, 44, "#1f2328", "#30353b")
+box(578, 375, 622, 425, 0, 14, "#3a3f47", "#4b5057")
+box(648, 345, 696, 452, 0, 17, "#d7d1c6", "#c4bdb0")
+box(686, 345, 696, 452, 17, 36, "#cfc8bb", "#bab2a3")
+box(648, 345, 686, 355, 17, 28, "#cfc8bb", "#bab2a3")
+box(648, 442, 686, 452, 17, 28, "#cfc8bb", "#bab2a3")
+box(672, 270, 694, 292, 0, 16, "#9a8f80", "#877c6d")
+box(675, 273, 691, 289, 16, 40, "#6f9a62", "#5c8551")
+box(655, 488, 677, 510, 0, 14, "#9a8f80", "#877c6d")
+box(658, 491, 674, 507, 14, 42, "#6f9a62", "#5c8551")
+# Comedor
+box(560, 580, 620, 690, 0, 32, "#c9b08a", "#b39a73")
+for cy in (590, 627, 664):
+    box(542, cy, 556, cy + 16, 0, 19, "#e3e0da", "#cfcbc3")
+    box(539, cy, 543, cy + 16, 0, 38, "#e3e0da", "#cfcbc3")
+    box(624, cy, 638, cy + 16, 0, 19, "#e3e0da", "#cfcbc3")
+    box(637, cy, 641, cy + 16, 0, 38, "#e3e0da", "#cfcbc3")
+# Cocina
+box(706, 420, 748, 590, 0, 38, "#c9cdd1", "#eeeeec")
+box(714, 432, 740, 456, 38, 39, "#9ea4aa")
+box(712, 498, 742, 540, 38, 39, "#26292d")
+box(706, 596, 748, 656, 0, WALL_H, "#b7bcc1", "#d4d8dc")
+# Lavandería / depósito
+box(894, 394, 944, 440, 0, 38, "#ffffff", "#e6e8ea")
+box(828, 394, 878, 420, 0, 34, "#f4f4f2", "#dcdcd8")
+box(890, 500, 944, 632, 0, WALL_H - 4, "#c8b999", "#e0d4bb")
+# Baños
+for (tx, vx) in ((372, 322), (440, 474)):
+    box(tx, 572, tx + 22, 581, 0, 30, "#ffffff", "#e3e6e9")
+    box(tx + 2, 581, tx + 20, 604, 0, 17, "#ffffff", "#e3e6e9")
+    box(vx, 572, vx + 30, 596, 0, 30, "#ffffff", "#e3e6e9")
+box(320, 694, 386, 734, 0, 2, "#eef2f4")
+box(320, 692.5, 386, 694.5, 2, WALL_H, "#a9cfe0", glass=True)
+box(444, 694, 504, 734, 0, 2, "#eef2f4")
+box(444, 692.5, 504, 694.5, 2, WALL_H, "#a9cfe0", glass=True)
+box(846, 725, 870, 734, 0, 30, "#ffffff", "#e3e6e9")
+box(848, 702, 868, 725, 0, 17, "#ffffff", "#e3e6e9")
+box(914, 704, 944, 734, 0, 30, "#ffffff", "#e3e6e9")
+# Ducto
+box(394, 684, 436, 734, 0, WALL_H, "#9aa0a6", "#c2c6cb", kind="wall")
+
+# Pisos: (rect, tipo)
+FLOORS = [
+    ((118, 474, 315, 738), "wood"), ((205, 262, 385, 474), "wood"), ((385, 262, 515, 474), "wood"),
+    ((315, 474, 515, 568), "wood"), ((508, 320, 702, 738), "wood"),
+    ((315, 568, 415, 738), "wet"), ((415, 568, 508, 738), "wet"),
+    ((702, 388, 820, 738), "tile"), ((820, 388, 950, 640), "tile"), ((820, 640, 950, 738), "wet"),
+    ((515, 262, 702, 320), "balc"), ((390, 680, 440, 738), "duct"),
+]
+FLOOR_COL = {"wood": ("#dcc098", "#c9aa7c", 11), "wet": ("#e2e9ed", "#c8d2d8", 26),
+             "tile": ("#ebe7df", "#d6d0c4", 28), "balc": ("#cfd3d6", "#b8bdc2", 22),
+             "duct": ("#b5bac0", "#b5bac0", 0)}
+FOOT = [(114, 470), (201, 470), (201, 258), (706, 258), (706, 406), (746, 406),
+        (746, 384), (954, 384), (954, 742), (114, 742)]
+
+# (n°, nombre, etiqueta 3D, etiqueta planta)
+ROOMS = [
+    (1, "Dormitorio principal", (190, 610), (190, 600)),
+    (2, "Dormitorio 2", (295, 420), (295, 420)),
+    (3, "Dormitorio 3", (450, 415), (450, 420)),
+    (4, "Baño 1", (362, 640), (365, 640)),
+    (5, "Baño 2", (470, 655), (462, 650)),
+    (6, "Sala", (600, 470), (600, 470)),
+    (7, "Comedor", (590, 715), (590, 715)),
+    (8, "Cocina", (770, 520), (775, 520)),
+    (9, "Balcón", (600, 292), (608, 292)),
+    (10, "Lavandería", (870, 460), (870, 455)),
+    (11, "Depósito", (860, 560), (860, 560)),
+    (12, "Baño 3", (905, 675), (905, 690)),
+]
+
+# --------------------------------------------------------------------------
+# Proyección axonométrica
+# --------------------------------------------------------------------------
+ANG = math.radians(24)
+CA, SA = math.cos(ANG), math.sin(ANG)
+K = 0.9
+
+
+def raw(x, y, z):
+    return (x * CA - y * SA, -((x * SA + y * CA) * K - z))
+
+
+def depth(x, y):
+    return x * SA + y * CA
+
+
+pts = [raw(b[k1], b[k2], b[k3]) for b in boxes for k1 in ("x1", "x2")
+       for k2 in ("y1", "y2") for k3 in ("z0", "z1")]
+pts += [raw(x, y, -SLAB) for x, y in FOOT]
+minx, maxx = min(p[0] for p in pts), max(p[0] for p in pts)
+miny, maxy = min(p[1] for p in pts), max(p[1] for p in pts)
+AREA = (14 * mm, 30 * mm, 292 * mm, 262 * mm)   # x0, y0, x1, y1
+SC = min((AREA[2] - AREA[0]) / (maxx - minx), (AREA[3] - AREA[1]) / (maxy - miny))
+OX = AREA[0] + ((AREA[2] - AREA[0]) - (maxx - minx) * SC) / 2 - minx * SC
+OY = AREA[1] + ((AREA[3] - AREA[1]) - (maxy - miny) * SC) / 2 - miny * SC
+
+
+def P(x, y, z=0):
+    u, v = raw(x, y, z)
+    return OX + u * SC, OY + v * SC
+
+
+c = canvas.Canvas(OUT, pagesize=(PW, PH))
+c.setTitle("Plano de distribución - Dpto. 1508, Edificio A - Alto Lima Park")
+
+
+def poly(points, fill=None, stroke=None, lw=0.3, alpha=None):
+    p = c.beginPath()
+    p.moveTo(*points[0])
+    for q in points[1:]:
+        p.lineTo(*q)
+    p.close()
+    c.saveState()
+    if alpha is not None:
+        c.setFillAlpha(alpha)
+    if fill is not None:
+        c.setFillColor(fill)
+    if stroke is not None:
         c.setStrokeColor(stroke)
         c.setLineWidth(lw)
-    c.rect(X(x1), Y(y2), (x2 - x1) * S, (y2 - y1) * S, fill=1, stroke=1 if stroke else 0)
+    c.drawPath(p, fill=1 if fill is not None else 0, stroke=1 if stroke is not None else 0)
+    c.restoreState()
 
 
-def hwall(y, x1, x2):
-    rect(x1 - T / 2, y - T / 2, x2 + T / 2, y + T / 2, WALL)
+def shade(col, f):
+    return Color(col.red * f, col.green * f, col.blue * f)
 
 
-def vwall(x, y1, y2):
-    rect(x - T / 2, y1 - T / 2, x + T / 2, y2 + T / 2, WALL)
+def inside(px, py, pg):
+    ins = False
+    for i in range(len(pg)):
+        (x1, y1), (x2, y2) = pg[i], pg[i - 1]
+        if (y1 > py) != (y2 > py) and px < (x2 - x1) * (py - y1) / (y2 - y1) + x1:
+            ins = not ins
+    return ins
 
 
-def line(x1, y1, x2, y2, col=FIXL, lw=0.5, dash=None):
-    c.setStrokeColor(col)
-    c.setLineWidth(lw)
-    c.setDash(*dash) if dash else c.setDash()
-    c.line(X(x1), Y(y1), X(x2), Y(y2))
-    c.setDash()
+# ---------- Losa ----------
+SLAB_SIDE = HexColor("#8d949b")
+edges = []
+for i in range(len(FOOT)):
+    (x1, y1), (x2, y2) = FOOT[i], FOOT[(i + 1) % len(FOOT)]
+    nx, ny = y2 - y1, -(x2 - x1)
+    ln = math.hypot(nx, ny)
+    nx, ny = nx / ln, ny / ln
+    mx, my = (x1 + x2) / 2, (y1 + y2) / 2
+    if inside(mx + nx * 2, my + ny * 2, FOOT):
+        nx, ny = -nx, -ny
+    if nx * SA + ny * CA > 0:
+        edges.append((depth(mx, my), (x1, y1, x2, y2), shade(SLAB_SIDE, 0.85 if abs(nx) > 0.5 else 1)))
+for _, (x1, y1, x2, y2), col in sorted(edges):
+    poly([P(x1, y1, 0), P(x2, y2, 0), P(x2, y2, -SLAB), P(x1, y1, -SLAB)], col, shade(col, 0.8))
+poly([P(x, y, 0) for x, y in FOOT], HexColor("#e2ded6"), HexColor("#7d838a"), 0.4)
 
-
-def door(hx, hy, closed, opened, ln):
-    """Puerta: bisagra, dirección cerrada, dirección abierta, largo (px)."""
-    hxp, hyp = X(hx), Y(hy)
-    r = ln * S
-    a1 = math.degrees(math.atan2(-closed[1], closed[0]))
-    a2 = math.degrees(math.atan2(-opened[1], opened[0]))
-    ext = (a2 - a1 + 180) % 360 - 180
-    c.setStrokeColor(FIXL)
-    c.setLineWidth(0.45)
-    c.setDash(1.2, 1.2)
+# ---------- Pisos ----------
+for (x1, y1, x2, y2), kind in FLOORS:
+    base, ln_col, step = FLOOR_COL[kind]
+    quad = [P(x1, y1), P(x2, y1), P(x2, y2), P(x1, y2)]
+    poly(quad, HexColor(base))
+    if not step:
+        continue
+    c.saveState()
     p = c.beginPath()
-    p.arc(hxp - r, hyp - r, hxp + r, hyp + r, a1, ext)
-    c.drawPath(p, stroke=1, fill=0)
-    c.setDash()
-    c.setStrokeColor(INK)
-    c.setLineWidth(0.9)
-    c.line(hxp, hyp, hxp + r * opened[0], hyp - r * opened[1])
-
-
-def window_h(y, x1, x2):
-    rect(x1, y - T / 2, x2, y + T / 2, white, INK, 0.5)
-    line(x1, y, x2, y, INK, 0.4)
-
-
-def window_v(x, y1, y2):
-    rect(x - T / 2, y1, x + T / 2, y2, white, INK, 0.5)
-    line(x, y1, x, y2, INK, 0.4)
-
-
-def oval(cx, cy, rx, ry, fill=FIX):
-    c.setFillColor(fill)
-    c.setStrokeColor(FIXL)
-    c.setLineWidth(0.45)
-    c.ellipse(X(cx - rx), Y(cy + ry), X(cx + rx), Y(cy - ry), fill=1, stroke=1)
-
-
-def box(x1, y1, x2, y2, fill=FIX, r=0):
-    c.setFillColor(fill)
-    c.setStrokeColor(FIXL)
-    c.setLineWidth(0.45)
-    if r:
-        c.roundRect(X(x1), Y(y2), (x2 - x1) * S, (y2 - y1) * S, r * S, fill=1, stroke=1)
+    p.moveTo(*quad[0])
+    for q in quad[1:]:
+        p.lineTo(*q)
+    p.close()
+    c.clipPath(p, stroke=0, fill=0)
+    c.setStrokeColor(HexColor(ln_col))
+    c.setLineWidth(0.25)
+    if kind == "wood":
+        yy, row = y1, 0
+        while yy < y2:
+            c.line(*P(x1, yy), *P(x2, yy))
+            xx = x1 + (row * 37) % 90
+            while xx < x2:
+                c.line(*P(xx, yy), *P(xx, min(yy + step, y2)))
+                xx += 90
+            yy += step
+            row += 1
     else:
-        c.rect(X(x1), Y(y2), (x2 - x1) * S, (y2 - y1) * S, fill=1, stroke=1)
+        xx = x1
+        while xx < x2:
+            c.line(*P(xx, y1), *P(xx, y2))
+            xx += step
+        yy = y1
+        while yy < y2:
+            c.line(*P(x1, yy), *P(x2, yy))
+            yy += step
+    c.restoreState()
+# alfombra sala
+poly([P(548, 340, .5), P(640, 340, .5), P(640, 462, .5), P(548, 462, .5)],
+     HexColor("#efe9df"), HexColor("#d8cfc0"), 0.3)
 
 
-def wc(cx, cy, facing):  # facing: 'u','d','l','r' (hacia donde mira)
-    if facing in "ud":
-        box(cx - 14, cy - 22 if facing == "u" else cy - 8, cx + 14, cy + 8 if facing == "u" else cy + 22, r=2)
-        oval(cx, cy + (8 if facing == "u" else -8) * -1 if False else cy, 12, 16)
-    else:
-        oval(cx, cy, 16, 12)
-
-
-def bed(x1, y1, x2, y2, head="u"):
-    box(x1, y1, x2, y2, HexColor("#d9dde2"), r=3)
-    if head == "u":
-        pw = (x2 - x1) / 2 - 4
-        box(x1 + 3, y1 + 3, x1 + 3 + pw, y1 + 22, white, r=3)
-        box(x2 - 3 - pw, y1 + 3, x2 - 3, y1 + 22, white, r=3)
-        line(x1, y1 + (y2 - y1) * 0.35, x2, y1 + (y2 - y1) * 0.35, FIXL, 0.4)
-    else:
-        ph = (y2 - y1) / 2 - 4
-        box(x1 + 3, y1 + 3, x1 + 22, y1 + 3 + ph, white, r=3)
-        box(x1 + 3, y2 - 3 - ph, x1 + 22, y2 - 3, white, r=3)
-        line(x1 + (x2 - x1) * 0.35, y1, x1 + (x2 - x1) * 0.35, y2, FIXL, 0.4)
-
-
-def label(px, py, num, name, size=5.6):
-    cx, cy = X(px), Y(py)
+def north_arrow(pt, R, cx, cy):
+    """Flecha norte hacia +x, dibujada con la transformación pt(x, y)."""
+    circ = [pt(cx + R * math.cos(t * math.pi / 24), cy + R * math.sin(t * math.pi / 24)) for t in range(48)]
+    poly(circ, None, INK, 0.6)
+    tip = pt(cx + R * 0.95, cy)
+    mid = pt(cx - R * 0.15, cy)
+    poly([tip, pt(cx - R * 0.45, cy - R * 0.36), mid], INK)
+    poly([tip, mid, pt(cx - R * 0.45, cy + R * 0.36)], white, INK, 0.5)
+    lab = pt(cx + R * 1.4, cy)
     c.setFillColor(INK)
-    c.circle(cx, cy + 3.4 * mm, 2.1 * mm, fill=1, stroke=0)
+    c.setFont("Helvetica-Bold", 11)
+    c.drawCentredString(lab[0], lab[1] - 4, "N")
+
+
+# Norte sobre el terreno (vista 3D)
+north_arrow(P, 36, 150, 360)
+
+# ---------- Sólidos: orden de pintor ----------
+for b in boxes:
+    corners = [P(b[a], b[bb], b[z]) for a in ("x1", "x2") for bb in ("y1", "y2") for z in ("z0", "z1")]
+    b["bb"] = (min(q[0] for q in corners), min(q[1] for q in corners),
+               max(q[0] for q in corners), max(q[1] for q in corners))
+    b["d"] = depth((b["x1"] + b["x2"]) / 2, (b["y1"] + b["y2"]) / 2)
+
+E = 0.01
+
+
+def first(a, b):
+    """True si a va antes que b; False si después; None si no importa."""
+    ab, bb_ = a["bb"], b["bb"]
+    if ab[2] <= bb_[0] or bb_[2] <= ab[0] or ab[3] <= bb_[1] or bb_[3] <= ab[1]:
+        return None
+    ax = a["x2"] <= b["x1"] + E
+    bx = b["x2"] <= a["x1"] + E
+    ay = a["y2"] <= b["y1"] + E
+    by = b["y2"] <= a["y1"] + E
+    if (ax or ay) and not (bx or by):
+        return True
+    if (bx or by) and not (ax or ay):
+        return False
+    if ax or bx or ay or by:
+        return a["d"] < b["d"]
+    if a["z0"] != b["z0"]:
+        return a["z0"] < b["z0"]
+    if a["z1"] != b["z1"]:
+        return a["z1"] < b["z1"]
+    return None
+
+
+n = len(boxes)
+succ = [[] for _ in range(n)]
+indeg = [0] * n
+for i in range(n):
+    for j in range(i + 1, n):
+        r = first(boxes[i], boxes[j])
+        if r is True:
+            succ[i].append(j)
+            indeg[j] += 1
+        elif r is False:
+            succ[j].append(i)
+            indeg[i] += 1
+heap = [(boxes[i]["d"], i) for i in range(n) if indeg[i] == 0]
+heapq.heapify(heap)
+order, done = [], [False] * n
+while len(order) < n:
+    if not heap:   # ciclo: se rompe por profundidad
+        k = min((boxes[i]["d"], i) for i in range(n) if not done[i])[1]
+        heap.append((boxes[k]["d"], k))
+    _, i = heapq.heappop(heap)
+    if done[i]:
+        continue
+    done[i] = True
+    order.append(i)
+    for j in succ[i]:
+        indeg[j] -= 1
+        if indeg[j] == 0 and not done[j]:
+            heapq.heappush(heap, (boxes[j]["d"], j))
+
+for i in order:
+    b = boxes[i]
+    x1, y1, x2, y2, z0, z1 = b["x1"], b["y1"], b["x2"], b["y2"], b["z0"], b["z1"]
+    side = [P(x2, y1, z0), P(x2, y2, z0), P(x2, y2, z1), P(x2, y1, z1)]
+    front = [P(x1, y2, z0), P(x2, y2, z0), P(x2, y2, z1), P(x1, y2, z1)]
+    top = [P(x1, y1, z1), P(x2, y1, z1), P(x2, y2, z1), P(x1, y2, z1)]
+    if b["glass"]:
+        for f in (side, front, top):
+            poly(f, b["top"], HexColor("#6f95a8"), 0.25, alpha=0.25)
+        continue
+    edge = shade(b["side"], 0.72) if b["kind"] != "wall" else HexColor("#8a8f96")
+    poly(side, shade(b["side"], 0.82), edge, 0.25)
+    poly(front, b["side"], edge, 0.25)
+    poly(top, b["top"], shade(b["top"], 0.8) if b["kind"] == "wall" else edge, 0.25)
+
+# hornillas
+for (hx, hy) in ((720, 508), (734, 508), (720, 528), (734, 528)):
+    ring = [P(hx + 4.5 * math.cos(t * math.pi / 8), hy + 4.5 * math.sin(t * math.pi / 8), 39.2) for t in range(16)]
+    poly(ring, None, HexColor("#8a8f96"), 0.4)
+
+# ---------- Etiquetas 3D ----------
+for num, name, (lx, ly), _ in ROOMS:
+    px, py = P(lx, ly, 0)
+    w = c.stringWidth(name.upper(), "Helvetica-Bold", 7) + 7 * mm
+    c.saveState()
     c.setFillColor(white)
-    c.setFont("Helvetica-Bold", 7)
-    c.drawCentredString(cx, cy + 3.4 * mm - 2.4, str(num))
+    c.setFillAlpha(0.9)
+    c.setStrokeColor(HexColor("#b9b2a5"))
+    c.setLineWidth(0.4)
+    c.roundRect(px - w / 2, py - 2.6 * mm, w, 5.2 * mm, 2.6 * mm, fill=1, stroke=1)
+    c.restoreState()
     c.setFillColor(INK)
-    c.setFont("Helvetica-Bold", size)
-    for i, part in enumerate(name.split("\n")):
-        c.drawCentredString(cx, cy - 0.2 * mm - i * (size + 1.2), part)
-
-
-# =============================== PÁGINA 1 ===================================
-# Cabecera
-c.setFillColor(INK)
-c.rect(0, H - 22 * mm, W, 22 * mm, fill=1, stroke=0)
-c.setFillColor(white)
-c.setFont("Helvetica-Bold", 15)
-c.drawString(12 * mm, H - 11 * mm, "PLANO REFERENCIAL DE INSPECCIÓN")
-c.setFont("Helvetica", 8.5)
-c.drawString(12 * mm, H - 17 * mm,
-             "Alto Lima Park Cercado  ·  Edificio A  ·  Departamento 1508  ·  Tipología 208 al 2008")
-c.setFont("Helvetica-Bold", 8)
-c.drawRightString(W - 12 * mm, H - 11 * mm, "LÁMINA 1 / 2")
-c.setFont("Helvetica", 8)
-c.drawRightString(W - 12 * mm, H - 17 * mm, "Distribución general")
-
-# --- Pisos (zonas) ---
-rect(205, 262, 385, 470, F_DORM)                # Dorm 2
-rect(385, 262, 515, 470, F_DORM)                # Dorm 3
-rect(118, 478, 315, 738, F_DORM)                # Dorm 1
-rect(205, 470, 320, 540, F_LIVING)              # circulación
-rect(320, 470, 515, 568, F_LIVING)              # pasillo
-rect(515, 320, 703, 738, F_LIVING)              # sala / comedor
-rect(517, 262, 700, 320, F_BALC)                # balcón
-rect(318, 568, 412, 738, F_WET)                 # baño 1
-rect(420, 568, 505, 738, F_WET)                 # baño 2
-rect(703, 388, 820, 738, F_SERV)                # cocina + acceso
-rect(820, 388, 950, 738, F_SERV)                # lav/depósito
-rect(820, 640, 950, 738, F_WET)                 # baño 3
-rect(118, 690, 315, 738, HexColor("#cfc6b6"))   # closet
-rect(392, 680, 438, 738, white)                 # ducto / retranqueo
-
-# grilla de piso muy tenue (sugerencia de acabado)
-c.setStrokeColor(HexColor("#e2d6c2"))
-c.setLineWidth(0.15)
-for xx in range(210, 700, 22):
-    c.line(X(xx), Y(738), X(xx), Y(262))
-
-# --- Muros ---
-hwall(262, 205, 515)
-vwall(205, 262, 478)
-vwall(385, 262, 470)
-vwall(515, 262, 470)
-hwall(470, 205, 325)
-hwall(470, 445, 515)
-hwall(262, 517, 700)
-vwall(700, 262, 410)
-line(525, 320, 692, 320, INK, 1.1)              # mampara balcón
-line(525, 324, 692, 324, INK, 0.5)
-vwall(703, 410, 660)
-hwall(410, 700, 750)
-vwall(750, 388, 410)
-hwall(388, 750, 950)
-vwall(950, 388, 738)
-vwall(820, 460, 520)
-vwall(820, 580, 738)
-hwall(640, 820, 835)
-hwall(640, 885, 950)
-hwall(738, 118, 390)
-hwall(738, 440, 755)
-hwall(738, 815, 950)
-vwall(390, 680, 738)
-vwall(440, 680, 738)
-hwall(680, 390, 440)
-vwall(118, 478, 738)
-hwall(478, 118, 205)
-vwall(315, 540, 600)
-vwall(315, 650, 738)
-hwall(568, 318, 508)
-vwall(415, 568, 738)
-vwall(508, 568, 590)
-vwall(508, 640, 738)
-line(320, 690, 315, 690, INK)
-hwall(690, 118, 315)                            # frente de closet
-
-# --- Ventanas ---
-window_h(262, 232, 360)
-window_h(262, 412, 490)
-window_v(205, 350, 440) if False else None
-window_v(118, 520, 640)
-window_h(388, 830, 940)
-window_v(950, 420, 470)
-
-# --- Puertas ---
-door(378, 470, (0, 1), (0, -1), 53)
-door(392, 470, (0, 1), (0, -1), 53)
-door(315, 600, (0, 1), (-1, 0), 50)             # dorm1 -> baño 1 (bisagra al sur)
-door(508, 590, (0, 1), (1, 0), 50)              # baño 2 -> comedor
-door(820, 580, (0, -1), (1, 0), 56)             # cocina -> depósito
-door(835, 640, (1, 0), (0, -1), 50)
-c.setFillColor(F_LIVING)
-c.rect(X(755), Y(738 + T / 2 + 1), 60 * S, T * S + 2, fill=1, stroke=0)
-door(815, 738, (-1, 0), (0, -1), 60)            # ingreso principal
-line(205, 470, 315, 470, LINE, 0.4, (1.2, 1.2))
-
-# --- Mobiliario / sanitarios ---
-bed(213, 272, 296, 385, "u")
-bed(298, 272, 378, 385, "u")
-bed(395, 272, 455, 385, "u")
-box(213, 430, 300, 462, HexColor("#3a3f47"))
-box(455, 430, 505, 462, HexColor("#3a3f47"))
-bed(132, 520, 245, 652, "l")
-box(122, 500, 140, 518, white, r=2)
-box(122, 656, 140, 674, white, r=2)
-# sala
-box(548, 340, 695, 460, HexColor("#e7dfd2"), r=2)
-box(575, 370, 625, 425, HexColor("#3a3f47"))
-box(640, 350, 695, 390, HexColor("#cfc9be"), r=6)
-box(640, 395, 695, 445, HexColor("#cfc9be"), r=6)
-# comedor
-box(548, 560, 630, 690, HexColor("#dcd3c3"), r=3)
-for cy in (585, 625, 665):
-    oval(540, cy, 9, 12)
-    oval(638, cy, 9, 12)
-# cocina
-box(707, 420, 748, 655, HexColor("#b9bcc0"))
-box(715, 430, 740, 455, white)                  # lavadero
-for (a, b) in ((718, 510), (735, 510), (718, 528), (735, 528)):
-    oval(a, b, 5, 5)
-box(707, 590, 748, 655, HexColor("#8f959c"))    # refrigeradora
-# lavandería
-box(895, 395, 940, 440, white, r=2)
-oval(917, 417, 14, 14)
-box(830, 396, 880, 420, white)
-# depósito
-box(890, 500, 945, 632, HexColor("#dcdcd6"))
-line(890, 500, 945, 632, FIXL, 0.35)
-line(945, 500, 890, 632, FIXL, 0.35)
-# baños
-oval(350, 606, 14, 18); box(340, 585, 362, 600)
-box(322, 700, 380, 733, white); line(322, 700, 380, 733, FIXL, 0.4)
-box(330, 575, 372, 588)
-oval(465, 606, 14, 18); box(455, 585, 477, 600)
-box(425, 700, 500, 733, white); line(425, 700, 500, 733, FIXL, 0.4)
-oval(858, 668, 14, 18); box(848, 647, 870, 662)
-box(826, 700, 945, 733, white); line(826, 700, 945, 733, FIXL, 0.4)
-# tocador
-box(318, 542, 425, 566, HexColor("#3a3f47"))
-# closet
-for xx in (118, 187, 256):
-    line(xx, 690, xx, 738, FIXL, 0.4)
-
-# --- Etiquetas ---
-label(295, 340, 2, "DORMITORIO 2") if False else None
-label(295, 420, 2, "DORMITORIO 2")
-label(450, 420, 3, "DORM. 3")
-label(215, 682, 1, "DORMITORIO PRINCIPAL", 5)
-label(614, 500, 6, "SALA")
-label(590, 722, 7, "COMEDOR")
-label(608, 290, 9, "BALCÓN")
-label(365, 655, 4, "BAÑO 1", 4.8)
-label(462, 655, 5, "BAÑO 2", 4.8)
-label(785, 480, 8, "COCINA", 5.2)
-label(880, 470, 10, "LAV.", 5.2)
-label(866, 565, 11, "DEPÓSITO", 5.2)
-label(905, 678, 12, "BAÑO 3", 5)
-label(262, 505, 13, "", 4)
-c.setFillColor(MUTED)
-c.setFont("Helvetica", 5)
-c.drawCentredString(X(216), Y(715), "CLOSET")
-c.setFont("Helvetica-Bold", 5.5)
-c.setFillColor(ACCENT)
-c.drawString(X(760), Y(752), "INGRESO")
-c.drawCentredString(X(370), Y(490), "CIRCULACIÓN")
-line(820, 490, 950, 490, FIXL, 0.35, (1.5, 1.5))
-
-# --- Panel lateral (leyenda) ---
-lx = 236 * mm
-c.setFillColor(INK)
-c.setFont("Helvetica-Bold", 8)
-c.drawString(lx, H - 30 * mm, "AMBIENTES")
-c.setStrokeColor(ACCENT)
-c.setLineWidth(1)
-c.line(lx, H - 31.5 * mm, W - 12 * mm, H - 31.5 * mm)
-AMB = ["Dormitorio principal", "Dormitorio 2", "Dormitorio 3", "Baño 1 (principal)",
-       "Baño 2 (común)", "Sala", "Comedor", "Cocina", "Balcón", "Lavandería",
-       "Depósito", "Baño 3 (servicio)", "Circulación"]
-yy = H - 37.5 * mm
-for i, a in enumerate(AMB, 1):
-    c.setFillColor(INK)
-    c.circle(lx + 2 * mm, yy + 1 * mm, 1.7 * mm, fill=1, stroke=0)
+    c.circle(px - w / 2 + 2.6 * mm, py, 1.9 * mm, fill=1, stroke=0)
     c.setFillColor(white)
     c.setFont("Helvetica-Bold", 6)
-    c.drawCentredString(lx + 2 * mm, yy + 1 * mm - 2, str(i))
+    c.drawCentredString(px - w / 2 + 2.6 * mm, py - 2.1, str(num))
     c.setFillColor(INK)
-    c.setFont("Helvetica", 7.2)
-    c.drawString(lx + 6 * mm, yy, a)
-    yy -= 5.2 * mm
+    c.setFont("Helvetica-Bold", 7)
+    c.drawString(px - w / 2 + 5.4 * mm, py - 2.4, name.upper())
 
-yy -= 2 * mm
-c.setFont("Helvetica-Bold", 8)
-c.drawString(lx, yy, "SIMBOLOGÍA")
-c.setStrokeColor(ACCENT)
-c.line(lx, yy - 1.5 * mm, W - 12 * mm, yy - 1.5 * mm)
-yy -= 7 * mm
-c.setFillColor(WALL)
-c.rect(lx, yy, 8 * mm, 1.6 * mm, fill=1, stroke=0)
-c.setFillColor(INK)
-c.setFont("Helvetica", 7)
-c.drawString(lx + 11 * mm, yy, "Muro / tabique")
-yy -= 5 * mm
-c.setFillColor(white)
+# ---------- Marco ----------
 c.setStrokeColor(INK)
+c.setLineWidth(1.2)
+c.rect(8 * mm, 8 * mm, PW - 16 * mm, PH - 16 * mm)
 c.setLineWidth(0.5)
-c.rect(lx, yy, 8 * mm, 1.6 * mm, fill=1, stroke=1)
-c.setFillColor(INK)
-c.drawString(lx + 11 * mm, yy, "Ventana")
-yy -= 5 * mm
-c.setStrokeColor(FIXL)
-c.setDash(1.2, 1.2)
-c.arc(lx, yy - 3 * mm, lx + 7 * mm, yy + 4 * mm, 0, 90)
-c.setDash()
-c.setFillColor(INK)
-c.drawString(lx + 11 * mm, yy, "Puerta y giro")
+c.rect(10 * mm, 10 * mm, PW - 20 * mm, PH - 20 * mm)
+RX = 300 * mm
+c.setLineWidth(0.8)
+c.line(RX, 10 * mm, RX, PH - 10 * mm)
 
-# Nota
-ny = 46 * mm
-c.setFillColor(HexColor("#f4efe6"))
+c.setFillColor(INK)
+c.setFont("Helvetica-Bold", 13)
+c.drawString(16 * mm, PH - 19 * mm, "VISTA 3D — DISTRIBUCIÓN DEL DEPARTAMENTO")
+c.setFont("Helvetica", 8.5)
+c.setFillColor(MUTED)
+c.drawString(16 * mm, PH - 24.5 * mm, "Vista axonométrica con corte horizontal de muros  ·  Sin escala")
 c.setStrokeColor(ACCENT)
-c.setLineWidth(0.6)
-c.rect(lx, ny - 2 * mm, W - 12 * mm - lx, 26 * mm, fill=1, stroke=1)
+c.setLineWidth(1.2)
+c.line(16 * mm, PH - 27 * mm, 120 * mm, PH - 27 * mm)
+
+# --------------------------------------------------------------------------
+# Columna derecha
+# --------------------------------------------------------------------------
+CX0, CX1 = RX + 5 * mm, PW - 15 * mm
+CW = CX1 - CX0
+
 c.setFillColor(INK)
-c.setFont("Helvetica-Bold", 6.6)
-c.drawString(lx + 2 * mm, ny + 20 * mm, "NOTAS")
-c.setFont("Helvetica", 6)
-notas = ["1. Sin escala. Sin medidas: las cotas",
-         "   se registran en la lámina 2.",
-         "2. Redibujado a partir del Anexo de",
-         "   Planos V.02 (referencial).",
-         "3. Puertas y ventanas por confirmar",
-         "   en campo."]
-for i, t in enumerate(notas):
-    c.drawString(lx + 2 * mm, ny + 16 * mm - i * 3 * mm, t)
+c.rect(RX, PH - 36 * mm, PW - 10 * mm - RX, 26 * mm, fill=1, stroke=0)
+c.setFillColor(white)
+c.setFont("Helvetica-Bold", 17)
+c.drawString(CX0, PH - 21 * mm, "ALTO LIMA PARK")
+c.setFillColor(HexColor("#c9b27f"))
+c.setFont("Helvetica", 9.5)
+c.drawString(CX0, PH - 27.5 * mm, "C E R C A D O   D E   L I M A")
+c.setFillColor(white)
+c.setFont("Helvetica", 8)
+c.drawString(CX0, PH - 32.5 * mm, "Edificio A  ·  Departamento 1508")
 
-# Norte
-nx, ny2 = W - 22 * mm, 60 * mm
 
-# Cuadro de datos (pie)
-by = 8 * mm
-bh = 30 * mm
+def section(y, title):
+    c.setFillColor(INK)
+    c.setFont("Helvetica-Bold", 8.5)
+    c.drawString(CX0, y, title)
+    c.setStrokeColor(ACCENT)
+    c.setLineWidth(0.9)
+    c.line(CX0, y - 2 * mm, CX1, y - 2 * mm)
+
+
+# Planta 2D
+section(PH - 44 * mm, "PLANTA DE DISTRIBUCIÓN")
+s2 = CW / (954 - 114) * 0.98
+ox2 = CX0 + (CW - (954 - 114) * s2) / 2 - 114 * s2
+oy2 = PH - 50 * mm + 258 * s2
+
+
+def Q(x, y):
+    return ox2 + x * s2, oy2 - y * s2
+
+
+def qrect(x1, y1, x2, y2, stroke=0):
+    c.rect(Q(x1, y2)[0], Q(x1, y2)[1], (x2 - x1) * s2, (y2 - y1) * s2, fill=1, stroke=stroke)
+
+
+for (x1, y1, x2, y2), kind in FLOORS:
+    c.setFillColor(HexColor(FLOOR_COL[kind][0]))
+    qrect(x1, y1, x2, y2)
+c.setFillColor(HexColor("#2b2f36"))
+for r in walls2d:
+    qrect(*r)
+c.setFillColor(HexColor("#9aa0a6"))
+qrect(394, 684, 436, 734)
+c.setStrokeColor(INK)
+c.setLineWidth(0.35)
+for (o, pos, a, b) in wins2d:
+    c.setFillColor(white)
+    if o == "h":
+        qrect(a, pos - 4, b, pos + 4, 1)
+        c.line(*Q(a, pos), *Q(b, pos))
+    else:
+        qrect(pos - 4, a, pos + 4, b, 1)
+        c.line(*Q(pos, a), *Q(pos, b))
+# giros de puerta
+c.setStrokeColor(MUTED)
+c.setLineWidth(0.3)
+c.setDash(1, 1)
+for (hx, hy, a0, ext, r) in [(378, 474, 90, 90, 50), (392, 474, 90, -90, 50), (315, 540, 180, 90, 48),
+                             (315, 650, 0, -90, 46), (508, 640, 180, -90, 45), (820, 580, 0, -90, 50),
+                             (885, 640, 270, -90, 46), (815, 738, 90, 90, 56)]:
+    cx_, cy_ = Q(hx, hy)
+    rr = r * s2
+    p = c.beginPath()
+    p.arc(cx_ - rr, cy_ - rr, cx_ + rr, cy_ + rr, a0, ext)
+    c.drawPath(p, stroke=1, fill=0)
+c.setDash()
+for num, name, _, (lx, ly) in ROOMS:
+    px, py = Q(lx, ly)
+    c.setFillColor(INK)
+    c.circle(px, py, 1.7 * mm, fill=1, stroke=0)
+    c.setFillColor(white)
+    c.setFont("Helvetica-Bold", 5.6)
+    c.drawCentredString(px, py - 2, str(num))
+ix, iy = Q(785, 738)
+c.setFillColor(ACCENT)
+c.setFont("Helvetica-Bold", 5.5)
+c.drawCentredString(ix, iy - 3.4 * mm, "INGRESO")
+
+# Norte de la planta
+plan_bottom = Q(0, 742)[1]
+north_arrow(lambda x, y: (x, y), 6.5 * mm, CX1 - 12 * mm, plan_bottom - 11 * mm)
+
+# Leyenda
+ly0 = plan_bottom - 26 * mm
+section(ly0, "AMBIENTES")
+yy = ly0 - 7.5 * mm
+colw = CW / 2
+for k, (num, name, _, _) in enumerate(ROOMS):
+    col, row = divmod(k, 6)
+    x = CX0 + col * colw
+    y = yy - row * 5.4 * mm
+    c.setFillColor(INK)
+    c.circle(x + 2 * mm, y + 1 * mm, 1.8 * mm, fill=1, stroke=0)
+    c.setFillColor(white)
+    c.setFont("Helvetica-Bold", 6)
+    c.drawCentredString(x + 2 * mm, y + 1 * mm - 2.1, str(num))
+    c.setFillColor(INK)
+    c.setFont("Helvetica", 7.8)
+    c.drawString(x + 6 * mm, y, name)
+
+# Datos
+dy0 = yy - 6 * 5.4 * mm - 4 * mm
+section(dy0, "DATOS DEL DEPARTAMENTO")
+datos = [("Tipología", "Dptos. 208 al 2008 (Edificio A)"),
+         ("Dormitorios", "3"),
+         ("Baños", "2 + baño de servicio"),
+         ("Servicios", "Cocina · Lavandería · Depósito"),
+         ("Exterior", "Balcón"),
+         ("Área techada", "72.82 m² aprox.")]
+yy = dy0 - 7.5 * mm
+for k, v in datos:
+    c.setFillColor(MUTED)
+    c.setFont("Helvetica", 7.6)
+    c.drawString(CX0, yy, k)
+    c.setFillColor(INK)
+    c.setFont("Helvetica-Bold", 7.8)
+    c.drawString(CX0 + 26 * mm, yy, v)
+    yy -= 5 * mm
+
+# Rótulo
+by0, bh = 10 * mm, 34 * mm
+RW = PW - 10 * mm
 c.setStrokeColor(INK)
 c.setLineWidth(0.8)
-c.rect(12 * mm, by, W - 24 * mm, bh, fill=0, stroke=1)
-cols = [12, 92, 162, 232, 285]
-for xx in cols[1:-1]:
-    c.line(xx * mm, by, xx * mm, by + bh)
-c.line(12 * mm, by + bh - 9 * mm, (W - 12 * mm), by + bh - 9 * mm)
-hdr = ["PROYECTO", "UBICACIÓN", "DATOS DEL DEPARTAMENTO", "INSPECCIÓN"]
-val = [
-    ["Alto Lima Park Cercado", "Edificio A – Dpto. 1508", "Promotora: Imagina"],
-    ["Av. Benavides / Jr. Treneman", "Cercado de Lima", "Etapas II, III, IV y V"],
-    ["3 dormitorios · 2 baños + baño de servicio", "Cocina · Lavandería · Depósito · Balcón",
-     "Área techada: 72.82 m² aprox. (según anexo)"],
-    ["Fecha: ____ / ____ / ________", "Inspector: ______________________", "Firma: __________________"],
-]
-for k in range(4):
+c.line(RX, by0 + bh, RW, by0 + bh)
+c.line(RX, by0 + bh - 13 * mm, RW, by0 + bh - 13 * mm)
+c.line(RX, by0 + 9 * mm, RW, by0 + 9 * mm)
+m1, m2 = RX + (RW - RX) / 3, RX + 2 * (RW - RX) / 3
+c.line(m1, by0, m1, by0 + 9 * mm)
+c.line(m2, by0, m2, by0 + 9 * mm)
+for (y, lab, val) in ((by0 + bh - 4.5 * mm, "PROYECTO", "Alto Lima Park – Cercado de Lima"),
+                      (by0 + bh - 17.5 * mm, "PLANO", "Distribución – Planta y vista 3D")):
+    c.setFillColor(MUTED)
+    c.setFont("Helvetica", 6.2)
+    c.drawString(CX0, y, lab)
     c.setFillColor(INK)
-    c.setFont("Helvetica-Bold", 6.8)
-    c.drawString((cols[k] + 3) * mm, by + bh - 6 * mm, hdr[k])
+    c.setFont("Helvetica-Bold", 8.5)
+    c.drawString(CX0, y - 5 * mm, val)
+for (x, lab, val) in ((RX, "LÁMINA", "A-01"), (m1, "ESCALA", "S/E"), (m2, "FECHA", "09 / 2026")):
+    c.setFillColor(MUTED)
+    c.setFont("Helvetica", 6)
+    c.drawString(x + 3 * mm, by0 + 5.6 * mm, lab)
     c.setFillColor(INK)
-    c.setFont("Helvetica", 7.2)
-    for j, t in enumerate(val[k]):
-        c.drawString((cols[k] + 3) * mm, by + bh - 14.5 * mm - j * 5.3 * mm, t)
+    c.setFont("Helvetica-Bold", 9)
+    c.drawString(x + 3 * mm, by0 + 1.8 * mm, val)
 
-c.showPage()
-
-# =============================== PÁGINA 2 ===================================
-c.setFillColor(INK)
-c.rect(0, H - 22 * mm, W, 22 * mm, fill=1, stroke=0)
+# Simbología
+sy0 = yy - 4 * mm
+section(sy0, "SIMBOLOGÍA")
+yy = sy0 - 8 * mm
+c.setFillColor(HexColor("#2b2f36"))
+c.rect(CX0, yy, 9 * mm, 1.8 * mm, fill=1, stroke=0)
 c.setFillColor(white)
-c.setFont("Helvetica-Bold", 15)
-c.drawString(12 * mm, H - 11 * mm, "FICHA DE MEDIDAS Y ESTADO POR AMBIENTE")
-c.setFont("Helvetica", 8.5)
-c.drawString(12 * mm, H - 17 * mm,
-             "Edificio A  ·  Departamento 1508  ·  Completar durante la inspección (medidas en metros)")
-c.setFont("Helvetica-Bold", 8)
-c.drawRightString(W - 12 * mm, H - 11 * mm, "LÁMINA 2 / 2")
-
-heads = ["N°", "AMBIENTE", "LARGO (m)", "ANCHO (m)", "ALTO (m)", "ÁREA (m²)",
-         "PISO", "MUROS/TECHO", "PUERTA/VENT.", "INSTAL.", "OBSERVACIONES"]
-widths = [8, 41, 19, 19, 17, 19, 15, 21, 21, 15, 62]
-tx, ty = 12 * mm, H - 28 * mm
-rh = 10.3 * mm
-c.setFillColor(ACCENT)
-c.rect(tx, ty - 8 * mm, sum(widths) * mm, 8 * mm, fill=1, stroke=0)
-c.setFillColor(white)
-c.setFont("Helvetica-Bold", 6.2)
-xx = tx
-for h_, w_ in zip(heads, widths):
-    c.drawCentredString(xx + w_ * mm / 2, ty - 5 * mm, h_)
-    xx += w_ * mm
-y0 = ty - 8 * mm
-for i in range(len(AMB) + 1):
-    yb = y0 - (i + 1) * rh
-    if i % 2 == 0:
-        c.setFillColor(HexColor("#f7f4ee"))
-        c.rect(tx, yb, sum(widths) * mm, rh, fill=1, stroke=0)
-    if i < len(AMB):
-        c.setFillColor(INK)
-        c.setFont("Helvetica-Bold", 7)
-        c.drawCentredString(tx + widths[0] * mm / 2, yb + rh / 2 - 2, str(i + 1))
-        c.setFont("Helvetica", 7.4)
-        c.drawString(tx + (widths[0] + 2) * mm, yb + rh / 2 - 2, AMB[i])
-    else:
-        c.setFillColor(INK)
-        c.setFont("Helvetica-Bold", 7.4)
-        c.drawString(tx + (widths[0] + 2) * mm, yb + rh / 2 - 2, "TOTAL / OBSERVACIÓN GENERAL")
-# líneas
-c.setStrokeColor(LINE)
-c.setLineWidth(0.5)
-tot_h = (len(AMB) + 1) * rh
-for i in range(len(AMB) + 2):
-    c.line(tx, y0 - i * rh, tx + sum(widths) * mm, y0 - i * rh)
-xx = tx
-for w_ in widths + [0]:
-    c.line(xx, y0, xx, y0 - tot_h)
-    xx += w_ * mm
-# casillas B / R / M en columnas de estado
-c.setFont("Helvetica", 5.4)
-c.setFillColor(MUTED)
-state_cols = [6, 7, 8, 9]
-sx = tx + sum(widths[:6]) * mm
-for i in range(len(AMB)):
-    yb = y0 - (i + 1) * rh
-    xcur = sx
-    for k in range(6, 10):
-        wcol = widths[k] * mm
-        opts = ["B", "R", "M"]
-        for j, o in enumerate(opts):
-            cx_ = xcur + wcol * (j + 0.5) / 3
-            c.setStrokeColor(LINE)
-            c.circle(cx_, yb + rh / 2 + 0.5 * mm, 1.5 * mm, fill=0, stroke=1)
-            c.drawCentredString(cx_, yb + 1.6 * mm, o)
-        xcur += wcol
-
-py_ = y0 - tot_h - 6 * mm
-c.setFillColor(INK)
-c.setFont("Helvetica-Bold", 7)
-c.drawString(tx, py_, "Estado:  B = Bueno   ·   R = Regular   ·   M = Malo (marcar con un círculo)")
-c.setFont("Helvetica", 6.8)
-c.setFillColor(MUTED)
-c.drawString(tx, py_ - 4.5 * mm,
-             "Área de cada ambiente = largo × ancho. Contrastar el total con el área techada del anexo (72.82 m² aprox.). "
-             "Registrar fotografías con el número del ambiente.")
 c.setStrokeColor(INK)
-c.setLineWidth(0.6)
+c.setLineWidth(0.4)
+c.rect(CX0 + colw, yy, 9 * mm, 1.8 * mm, fill=1, stroke=1)
+c.line(CX0 + colw, yy + 0.9 * mm, CX0 + colw + 9 * mm, yy + 0.9 * mm)
 c.setFillColor(INK)
-c.setFont("Helvetica", 7)
-sy = 16 * mm
-c.line(tx + 10 * mm, sy, tx + 80 * mm, sy)
-c.drawCentredString(tx + 45 * mm, sy - 4 * mm, "Inspector")
-c.line(tx + 110 * mm, sy, tx + 180 * mm, sy)
-c.drawCentredString(tx + 145 * mm, sy - 4 * mm, "Conformidad / Fecha")
+c.setFont("Helvetica", 7.6)
+c.drawString(CX0 + 12 * mm, yy, "Muro / tabique")
+c.drawString(CX0 + colw + 12 * mm, yy, "Ventana / mampara")
+yy -= 7 * mm
+c.setStrokeColor(MUTED)
+c.setDash(1, 1)
+p = c.beginPath()
+p.arc(CX0 - 6 * mm, yy - 6 * mm, CX0 + 6 * mm, yy + 6 * mm, 0, 90)
+c.drawPath(p, stroke=1, fill=0)
+c.setDash()
+c.setStrokeColor(INK)
+c.line(CX0, yy, CX0, yy + 6 * mm)
+c.drawString(CX0 + 12 * mm, yy, "Puerta y sentido de giro")
+
+c.setFillColor(MUTED)
+c.setFont("Helvetica-Oblique", 6.3)
+c.drawString(16 * mm, 13 * mm, "Plano referencial. Distribución basada en el anexo de planos del proyecto (V.02).")
+
 c.showPage()
 c.save()
 print("OK ->", OUT)
