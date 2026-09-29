@@ -61,8 +61,9 @@ for v in M["ventanas"]:
         c_ = (x1 + x2) / 2
         g = (c_ - 1, y1, c_ + 1, y2)
     if v["tipo"] == "baranda":
-        box(x1, y1, x2, y2, 0, 15, WALL_TOP, WALL_SIDE, kind="wall")
-        box(*g, 15, 100, GLASS, glass=True)
+        box(x1, y1, x2, y2, 0, 10, WALL_TOP, WALL_SIDE, kind="wall")
+        box(*g, 10, 100, "#6b7075", glass=True)
+        box(g[0], g[1] - 1, g[2], g[3] + 1, 98, 104, "#2b2e31", "#2b2e31")
     else:
         box(*g, z0, z1, GLASS, glass=True)
     if v["tipo"] == "mampara":
@@ -126,6 +127,31 @@ def fparts(t, w, d, it):
         P.append((-W, -D, W, D, 0, 40, "#3a3f47", "#4b5057"))
     elif t == "alfombra":
         P.append((-W, -D, W, D, 0, 1, "#efe9df", "#d8cfc0"))
+    elif t == "mueble_tv":
+        P.append((-W, -D, W, D, 28, 60, "#6b4430", "#5a3828"))
+    elif t == "escritorio":
+        P += [(-W, -D, -W + 5, D, 0, 72, "#1f2224", "#1f2224"), (W - 5, -D, W, D, 0, 72, "#1f2224", "#1f2224"),
+              (-W, -D, W, D, 72, 76, "#b08a60", "#a0845b")]
+    elif t == "librero":
+        P.append((-W, -D, W, D, 0, 190, "#b08a60", "#a0845b"))
+    elif t == "silla_escritorio":
+        P += [(-25, -25, 25, 25, 0, 50, "#2f3336", "#2f3336"), (-23, -30, 23, -24, 50, 110, "#2f3336", "#2f3336")]
+    elif t == "mesa_nido":
+        P += [(-58, -52, 22, 28, 0, 46, "#6b4430", "#5a3828"), (-2, -10, 58, 50, 0, 38, "#7a4e37", "#5a3828")]
+    elif t == "puff":
+        P.append((-W + 5, -D + 5, W - 5, D - 5, 0, 40, "#c9774f", "#b0653f"))
+    elif t == "caminadora":
+        P += [(-W, -D, W, D, 0, 18, "#2b2e33", "#1f2124"), (-W, -D, W, -D + 30, 18, 130, "#2b2e33", "#1f2124")]
+    elif t == "cocina_4h":
+        P += [(-W, -D, W, D, 0, 90, "#f2f2f0", "#dcdcd8"), (-W + 4, -D + 4, W - 4, D - 4, 90, 92, "#2b2d30", "#2b2d30")]
+    elif t == "urinario_perro":
+        P.append((-W, -D, W, D, 0, 6, "#5f9a47", "#4f5358"))
+    elif t == "alfombra_bano":
+        P.append((-W, -D, W, D, 0, 2, "#e8e2d6", "#d4cdbf"))
+    elif t == "papelera":
+        P.append((-11, -11, 11, 11, 0, 28, "#e9ebec", "#c9cdd1"))
+    elif t in ("lampara_tripode", "candelabro_pie"):
+        P += [(-15, -15, 15, 15, 0, 3, "#2b2d30", "#2b2d30"), (-2, -2, 2, 2, 3, 130, "#2b2d30", "#2b2d30")]
     elif t == "lampara_pie":
         P += [(-15, -15, 15, 15, 0, 3, "#2b2d30", "#2b2d30"), (-2, -2, 2, 2, 3, 150, "#2b2d30", "#2b2d30")]
     elif t == "planta":
@@ -161,12 +187,21 @@ DEF = {"cama_1p": (95, 195), "cama_2p": (155, 200), "velador": (45, 40), "ropero
        "closet": (260, 60), "sofa": (190, 88), "sillon": (78, 80), "mesa_centro": (90, 50),
        "alfombra": (210, 210), "planta": (40, 40), "mesa_comedor": (90, 140), "silla": (45, 50),
        "cocina_lineal": (295, 60), "refrigeradora": (70, 70), "lavadero": (55, 50), "lavadora": (60, 62),
-       "terma": (45, 30), "estante": (120, 40), "inodoro": (38, 70), "lavatorio": (48, 42)}
+       "terma": (45, 30), "estante": (120, 40), "inodoro": (38, 70), "lavatorio": (48, 42),
+       "mesa_nido": (120, 90), "puff": (75, 75), "caminadora": (80, 180), "cocina_4h": (52, 60),
+       "urinario_perro": (70, 50), "alfombra_bano": (60, 40), "papelera": (24, 24), "lampara_tripode": (60, 60),
+       "candelabro_pie": (40, 30), "escritorio": (140, 60), "silla_escritorio": (62, 62), "librero": (90, 35),
+       "lavadora": (68, 72), "silla": (50, 55), "mesa_comedor": (90, 150), "sofa": (200, 92)}
+COLGADOS = {"tv", "split", "cuadro", "jardin_vertical", "jardinera", "toallero", "portapapel", "repisa_bano",
+            "lampara_colgante", "terma", "microondas", "candelabros"}
 
 for it in M["muebles"]:
     t = it["tipo"]
+    if t in COLGADOS or it.get("z"):
+        continue
     w0, d0 = DEF.get(t, (60, 60))
     w = cm(it["w"]) if "w" in it else w0
+    d0 = cm(it["d"]) if "d" in it else d0
     cx, cy = cm(it["x"]), cm(it["y"])
     a = math.radians(it["rot"])
     ca, sa = round(math.cos(a)), round(math.sin(a))

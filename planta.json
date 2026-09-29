@@ -1410,50 +1410,6 @@
  ],
  "muebles": [
   {
-   "tipo": "cama_1p",
-   "x": 1.808,
-   "y": 1.13,
-   "rot": 0
-  },
-  {
-   "tipo": "cama_1p",
-   "x": 3.288,
-   "y": 1.13,
-   "rot": 0
-  },
-  {
-   "tipo": "velador",
-   "x": 2.542,
-   "y": 0.362,
-   "rot": 0
-  },
-  {
-   "tipo": "ropero",
-   "x": 2.102,
-   "y": 2.848,
-   "rot": 180,
-   "w": 1.45
-  },
-  {
-   "tipo": "cama_1p",
-   "x": 5.108,
-   "y": 1.13,
-   "rot": 0
-  },
-  {
-   "tipo": "velador",
-   "x": 4.373,
-   "y": 0.362,
-   "rot": 0
-  },
-  {
-   "tipo": "ropero",
-   "x": 5.187,
-   "y": 2.848,
-   "rot": 180,
-   "w": 0.72
-  },
-  {
    "tipo": "cama_2p",
    "x": 1.164,
    "y": 4.667,
@@ -1479,95 +1435,283 @@
    "w": 2.65
   },
   {
-   "tipo": "sofa",
-   "x": 7.763,
-   "y": 2.463,
+   "tipo": "tv",
+   "x": 2.808,
+   "y": 4.633,
    "rot": -90,
-   "w": 1.75
+   "pulgadas": 55,
+   "alto": 1.15
   },
   {
-   "tipo": "sillon",
-   "x": 6.181,
-   "y": 1.797,
+   "tipo": "alfombra",
+   "x": 1.751,
+   "y": 4.667,
+   "rot": 90,
+   "w": 2.1,
+   "d": 1.5,
+   "color": "#d6cfc2"
+  },
+  {
+   "tipo": "cama_1p",
+   "x": 1.808,
+   "y": 1.13,
+   "rot": 0
+  },
+  {
+   "tipo": "cama_1p",
+   "x": 3.288,
+   "y": 1.13,
+   "rot": 0
+  },
+  {
+   "tipo": "velador",
+   "x": 2.542,
+   "y": 0.362,
+   "rot": 0
+  },
+  {
+   "tipo": "ropero",
+   "x": 2.102,
+   "y": 2.848,
+   "rot": 180,
+   "w": 1.45
+  },
+  {
+   "tipo": "cuadro",
+   "x": 3.74,
+   "y": 1.277,
+   "rot": -90,
+   "w": 0.7,
+   "alto": 1.45
+  },
+  {
+   "tipo": "escritorio",
+   "x": 4.746,
+   "y": 0.463,
+   "rot": 0,
+   "w": 1.4,
+   "d": 0.6
+  },
+  {
+   "tipo": "silla_escritorio",
+   "x": 4.746,
+   "y": 1.107,
+   "rot": 180
+  },
+  {
+   "tipo": "librero",
+   "x": 4.062,
+   "y": 1.955,
    "rot": 90
   },
   {
-   "tipo": "sillon",
-   "x": 6.181,
-   "y": 3.153,
-   "rot": 90
+   "tipo": "tv",
+   "x": 5.141,
+   "y": 3.141,
+   "rot": 180,
+   "pulgadas": 43,
+   "alto": 1.1
   },
   {
-   "tipo": "mesa_centro",
-   "x": 6.927,
-   "y": 2.463,
+   "tipo": "puff",
+   "x": 4.723,
+   "y": 2.486,
+   "rot": 20,
+   "color": "#c9774f"
+  },
+  {
+   "tipo": "puff",
+   "x": 5.334,
+   "y": 2.124,
+   "rot": -30,
+   "color": "#3f5a73"
+  },
+  {
+   "tipo": "alfombra",
+   "x": 5.028,
+   "y": 2.26,
+   "rot": 0,
+   "w": 1.2,
+   "d": 1.0,
+   "color": "#5c6b7a"
+  },
+  {
+   "tipo": "planta",
+   "x": 5.39,
+   "y": 1.333,
+   "rot": 0
+  },
+  {
+   "tipo": "sofa",
+   "x": 7.842,
+   "y": 2.102,
+   "rot": -90,
+   "w": 2.0
+  },
+  {
+   "tipo": "split",
+   "x": 8.215,
+   "y": 2.102,
+   "rot": -90
+  },
+  {
+   "tipo": "tv",
+   "x": 5.729,
+   "y": 2.011,
+   "rot": 90,
+   "pulgadas": 85,
+   "alto": 1.3
+  },
+  {
+   "tipo": "mueble_tv",
+   "x": 5.899,
+   "y": 2.011,
+   "rot": 90,
+   "w": 1.8
+  },
+  {
+   "tipo": "candelabros",
+   "x": 5.899,
+   "y": 1.198,
+   "rot": 90,
+   "z": 0.6
+  },
+  {
+   "tipo": "mesa_nido",
+   "x": 6.803,
+   "y": 2.011,
    "rot": 90
   },
   {
    "tipo": "alfombra",
-   "x": 7.029,
-   "y": 2.452,
-   "rot": 90
+   "x": 6.78,
+   "y": 2.068,
+   "rot": 90,
+   "w": 2.2,
+   "d": 1.6,
+   "color": "#cfc6b6"
   },
   {
-   "tipo": "planta",
+   "tipo": "candelabro_pie",
+   "x": 5.865,
+   "y": 3.04,
+   "rot": 0
+  },
+  {
+   "tipo": "lampara_tripode",
    "x": 8.136,
-   "y": 1.085,
+   "y": 3.39,
    "rot": 0
   },
   {
    "tipo": "planta",
-   "x": 8.159,
-   "y": 0.384,
+   "x": 6.351,
+   "y": 1.017,
    "rot": 0
   },
   {
-   "tipo": "planta",
-   "x": 5.853,
-   "y": 0.384,
-   "rot": 0
+   "tipo": "cuadro",
+   "x": 5.141,
+   "y": 3.288,
+   "rot": 0,
+   "w": 0.8,
+   "alto": 1.5
+  },
+  {
+   "tipo": "alfombra",
+   "x": 6.791,
+   "y": 5.277,
+   "rot": 0,
+   "w": 1.9,
+   "d": 2.3,
+   "color": "#8d8a83",
+   "borde": "#1f1f1f"
   },
   {
    "tipo": "mesa_comedor",
    "x": 6.791,
    "y": 5.277,
+   "rot": 0,
+   "servida": true
+  },
+  {
+   "tipo": "silla",
+   "x": 6.102,
+   "y": 4.949,
+   "rot": 90,
+   "color": "#1f8a70"
+  },
+  {
+   "tipo": "silla",
+   "x": 6.102,
+   "y": 5.605,
+   "rot": 90,
+   "color": "#e6dfd1"
+  },
+  {
+   "tipo": "silla",
+   "x": 7.481,
+   "y": 4.949,
+   "rot": -90,
+   "color": "#8a5a3c"
+  },
+  {
+   "tipo": "silla",
+   "x": 7.481,
+   "y": 5.605,
+   "rot": -90,
+   "color": "#1f3f8f"
+  },
+  {
+   "tipo": "lampara_colgante",
+   "x": 6.791,
+   "y": 5.006,
    "rot": 0
   },
   {
-   "tipo": "silla",
+   "tipo": "lampara_colgante",
    "x": 6.791,
-   "y": 4.509,
+   "y": 5.548,
    "rot": 0
   },
   {
-   "tipo": "silla",
-   "x": 6.791,
-   "y": 6.057,
-   "rot": 180
+   "tipo": "cuadro",
+   "x": 5.723,
+   "y": 5.627,
+   "rot": 90,
+   "w": 1.0,
+   "alto": 1.55
   },
   {
-   "tipo": "silla",
-   "x": 6.181,
-   "y": 5.006,
+   "tipo": "urinario_perro",
+   "x": 6.215,
+   "y": 0.452,
+   "rot": 0
+  },
+  {
+   "tipo": "jardin_vertical",
+   "x": 5.718,
+   "y": 0.441,
    "rot": 90
   },
   {
-   "tipo": "silla",
-   "x": 6.181,
-   "y": 5.548,
-   "rot": 90
-  },
-  {
-   "tipo": "silla",
-   "x": 7.401,
-   "y": 5.006,
+   "tipo": "jardin_vertical",
+   "x": 8.311,
+   "y": 0.441,
    "rot": -90
   },
   {
-   "tipo": "silla",
-   "x": 7.401,
-   "y": 5.548,
-   "rot": -90
+   "tipo": "jardinera",
+   "x": 7.345,
+   "y": 0.237,
+   "rot": 0
+  },
+  {
+   "tipo": "jardinera",
+   "x": 8.079,
+   "y": 0.237,
+   "rot": 0,
+   "w": 0.4
   },
   {
    "tipo": "cocina_lineal",
@@ -1575,6 +1719,19 @@
    "y": 3.379,
    "rot": 90,
    "w": 2.95
+  },
+  {
+   "tipo": "cocina_4h",
+   "x": 8.769,
+   "y": 3.842,
+   "rot": 90
+  },
+  {
+   "tipo": "microondas",
+   "x": 8.65,
+   "y": 4.497,
+   "rot": 90,
+   "z": 0.9
   },
   {
    "tipo": "refrigeradora",
@@ -1590,8 +1747,8 @@
   },
   {
    "tipo": "lavadora",
-   "x": 11.379,
-   "y": 2.961,
+   "x": 10.825,
+   "y": 2.904,
    "rot": 180
   },
   {
@@ -1601,10 +1758,10 @@
    "rot": -90
   },
   {
-   "tipo": "estante",
-   "x": 11.594,
+   "tipo": "caminadora",
+   "x": 11.385,
    "y": 4.339,
-   "rot": -90
+   "rot": 0
   },
   {
    "tipo": "inodoro",
@@ -1616,6 +1773,36 @@
    "tipo": "lavatorio",
    "x": 4.045,
    "y": 5.582,
+   "rot": -90
+  },
+  {
+   "tipo": "alfombra_bano",
+   "x": 3.39,
+   "y": 5.627,
+   "rot": 0
+  },
+  {
+   "tipo": "toallero",
+   "x": 2.989,
+   "y": 4.723,
+   "rot": 90
+  },
+  {
+   "tipo": "portapapel",
+   "x": 3.616,
+   "y": 4.548,
+   "rot": 0
+  },
+  {
+   "tipo": "papelera",
+   "x": 3.164,
+   "y": 4.678,
+   "rot": 0
+  },
+  {
+   "tipo": "repisa_bano",
+   "x": 4.237,
+   "y": 4.848,
    "rot": -90
   },
   {
@@ -1632,15 +1819,61 @@
    "rot": 90
   },
   {
+   "tipo": "alfombra_bano",
+   "x": 5.141,
+   "y": 5.424,
+   "rot": 90,
+   "color": "#9fb3a8"
+  },
+  {
+   "tipo": "toallero",
+   "x": 5.56,
+   "y": 5.684,
+   "rot": -90,
+   "color": "#9fb3a8"
+  },
+  {
+   "tipo": "portapapel",
+   "x": 4.35,
+   "y": 5.232,
+   "rot": 90
+  },
+  {
+   "tipo": "papelera",
+   "x": 5.367,
+   "y": 5.74,
+   "rot": 0
+  },
+  {
    "tipo": "inodoro",
    "x": 10.566,
    "y": 6.373,
    "rot": 180
   },
   {
-   "tipo": "lampara_pie",
-   "x": 8.159,
-   "y": 3.503,
+   "tipo": "alfombra_bano",
+   "x": 11.413,
+   "y": 6.057,
+   "rot": 0,
+   "color": "#c9b89a"
+  },
+  {
+   "tipo": "toallero",
+   "x": 11.413,
+   "y": 5.418,
+   "rot": 0,
+   "color": "#c9b89a"
+  },
+  {
+   "tipo": "portapapel",
+   "x": 10.119,
+   "y": 6.249,
+   "rot": 90
+  },
+  {
+   "tipo": "papelera",
+   "x": 10.306,
+   "y": 5.74,
    "rot": 0
   }
  ]

@@ -111,24 +111,51 @@ SPLASH = [
 
 # Muebles por defecto: tipo, x, y (px, centro), rotación (°), extras
 FURN = [
-    ("cama_1p", 210, 162, 0, {}), ("cama_1p", 341, 162, 0, {}), ("velador", 275, 94, 0, {}),
-    ("ropero", 236, 314, 180, {"w": 1.45}),
-    ("cama_1p", 502, 162, 0, {}), ("velador", 437, 94, 0, {}), ("ropero", 509, 314, 180, {"w": 0.72}),
+    # Dormitorio principal
     ("cama_2p", 153, 475, 90, {}), ("velador", 83, 392, 90, {}), ("velador", 83, 558, 90, {}),
-    ("closet", 183, 630, 180, {"w": 2.65}),
-    ("sofa", 737, 280, -90, {"w": 1.75}), ("sillon", 597, 221, 90, {}), ("sillon", 597, 341, 90, {}),
-    ("mesa_centro", 663, 280, 90, {}), ("alfombra", 672, 279, 90, {}),
-    ("planta", 770, 158, 0, {}), ("planta", 772, 96, 0, {}), ("planta", 568, 96, 0, {}),
-    ("mesa_comedor", 651, 529, 0, {}),
-    ("silla", 651, 461, 0, {}), ("silla", 651, 598, 180, {}),
-    ("silla", 597, 505, 90, {}), ("silla", 597, 553, 90, {}),
-    ("silla", 705, 505, -90, {}), ("silla", 705, 553, -90, {}),
-    ("cocina_lineal", 826, 361, 90, {"w": 2.95}), ("refrigeradora", 831, 522, 90, {}),
-    ("lavadero", 1073, 263, -90, {}), ("lavadora", 1057, 324, 180, {}), ("terma", 1081, 318, -90, {}),
-    ("estante", 1076, 446, -90, {}),
+    ("closet", 183, 630, 180, {"w": 2.65}), ("tv", 298.5, 472, -90, {"pulgadas": 55, "alto": 1.15}),
+    ("alfombra", 205, 475, 90, {"w": 2.1, "d": 1.5, "color": "#d6cfc2"}),
+    # Dormitorio 2
+    ("cama_1p", 210, 162, 0, {}), ("cama_1p", 341, 162, 0, {}), ("velador", 275, 94, 0, {}),
+    ("ropero", 236, 314, 180, {"w": 1.45}), ("cuadro", 381, 175, -90, {"w": 0.7, "alto": 1.45}),
+    # Dormitorio 3: trabajo y recreación
+    ("escritorio", 470, 103, 0, {"w": 1.4, "d": 0.6}), ("silla_escritorio", 470, 160, 180, {}),
+    ("librero", 409.5, 235, 90, {}), ("tv", 505, 340, 180, {"pulgadas": 43, "alto": 1.1}),
+    ("puff", 468, 282, 20, {"color": "#c9774f"}), ("puff", 522, 250, -30, {"color": "#3f5a73"}),
+    ("alfombra", 495, 262, 0, {"w": 1.2, "d": 1.0, "color": "#5c6b7a"}), ("planta", 527, 180, 0, {}),
+    # Sala
+    ("sofa", 744, 248, -90, {"w": 2.0}), ("split", 777, 248, -90, {}),
+    ("tv", 557, 240, 90, {"pulgadas": 85, "alto": 1.3}), ("mueble_tv", 572, 240, 90, {"w": 1.8}),
+    ("candelabros", 572, 168, 90, {"z": 0.6}), ("mesa_nido", 652, 240, 90, {}),
+    ("alfombra", 650, 245, 90, {"w": 2.2, "d": 1.6, "color": "#cfc6b6"}),
+    ("candelabro_pie", 569, 331, 0, {}), ("lampara_tripode", 770, 362, 0, {}), ("planta", 612, 152, 0, {}),
+    ("cuadro", 505, 353, 0, {"w": 0.8, "alto": 1.5}),
+    # Comedor
+    ("alfombra", 651, 529, 0, {"w": 1.9, "d": 2.3, "color": "#8d8a83", "borde": "#1f1f1f"}),
+    ("mesa_comedor", 651, 529, 0, {"servida": True}),
+    ("silla", 590, 500, 90, {"color": "#1f8a70"}), ("silla", 590, 558, 90, {"color": "#e6dfd1"}),
+    ("silla", 712, 500, -90, {"color": "#8a5a3c"}), ("silla", 712, 558, -90, {"color": "#1f3f8f"}),
+    ("lampara_colgante", 651, 505, 0, {}), ("lampara_colgante", 651, 553, 0, {}),
+    ("cuadro", 556.5, 560, 90, {"w": 1.0, "alto": 1.55}),
+    # Balcón
+    ("urinario_perro", 600, 102, 0, {}), ("jardin_vertical", 556, 101, 90, {}),
+    ("jardin_vertical", 785.5, 101, -90, {}), ("jardinera", 700, 83, 0, {}), ("jardinera", 765, 83, 0, {"w": 0.4}),
+    # Cocina
+    ("cocina_lineal", 826, 361, 90, {"w": 2.95}), ("cocina_4h", 826, 402, 90, {}),
+    ("microondas", 815.5, 460, 90, {"z": 0.9}), ("refrigeradora", 831, 522, 90, {}),
+    # Lavandería y depósito
+    ("lavadero", 1073, 263, -90, {}), ("lavadora", 1008, 319, 180, {}), ("terma", 1081, 318, -90, {}),
+    ("caminadora", 1057.5, 446, 0, {}),
+    # Baños
     ("inodoro", 395, 491, -90, {}), ("lavatorio", 408, 556, -90, {}),
+    ("alfombra_bano", 350, 560, 0, {}), ("toallero", 314.5, 480, 90, {}), ("portapapel", 370, 464.5, 0, {}),
+    ("papelera", 330, 476, 0, {}), ("repisa_bano", 425, 491, -90, {}),
     ("lavatorio", 452, 486, 90, {"abierto": True}), ("inodoro", 465, 550, 90, {}),
-    ("inodoro", 985, 626, 180, {}), ("lampara_pie", 772, 372, 0, {}),
+    ("alfombra_bano", 505, 542, 90, {"color": "#9fb3a8"}), ("toallero", 542, 565, -90, {"color": "#9fb3a8"}),
+    ("portapapel", 435, 525, 90, {}), ("papelera", 525, 570, 0, {}),
+    ("inodoro", 985, 626, 180, {}), ("alfombra_bano", 1060, 598, 0, {"color": "#c9b89a"}),
+    ("toallero", 1060, 541.5, 0, {"color": "#c9b89a"}), ("portapapel", 945.5, 615, 90, {}),
+    ("papelera", 962, 570, 0, {}),
 ]
 
 FOOTPRINT = [(50, 341), (157, 341), (157, 62), (799, 62), (799, 219), (1106, 219),
