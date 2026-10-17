@@ -1,0 +1,358 @@
+<title>Compras Dpto. 1508</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..100,500..800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style id="estilos">
+/* Layout: hoja de obra — resumen arriba, luego tarjetas por artículo agrupadas por ambiente; una columna en el celular */
+:root{
+  --bg:#eef0ee; --card:#fbfcfb; --soft:#f2f4f2; --ink:#1b2226; --muted:#5a666c; --line:#d3d9d6;
+  --accent:#8a5a2e; --accent-soft:#f1e5d7; --accent-ink:#ffffff;
+  --ok:#2f7a4f; --ok-soft:#e1f0e6; --warn:#9a6a12; --warn-soft:#f6ecd5; --info:#2f5f86; --info-soft:#e0ebf3;
+  --f-display:'Archivo','Arial Narrow',system-ui,sans-serif;
+  --f-body:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --f-mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121719; --card:#1a2023; --soft:#20282b; --ink:#e6ebe9; --muted:#9aa6aa; --line:#2e383b;
+    --accent:#d39a61; --accent-soft:#3a2c1f; --accent-ink:#1a1208;
+    --ok:#6fcf97; --ok-soft:#1d3327; --warn:#e6b65c; --warn-soft:#3a2f17; --info:#8ab8de; --info-soft:#1c2b38;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121719; --card:#1a2023; --soft:#20282b; --ink:#e6ebe9; --muted:#9aa6aa; --line:#2e383b;
+  --accent:#d39a61; --accent-soft:#3a2c1f; --accent-ink:#1a1208;
+  --ok:#6fcf97; --ok-soft:#1d3327; --warn:#e6b65c; --warn-soft:#3a2f17; --info:#8ab8de; --info-soft:#1c2b38;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.45}
+button,input,select,textarea{font:inherit;color:inherit}
+.wrap{max-width:960px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 120px}
+header h1{font-family:var(--f-display);font-stretch:80%;font-weight:760;font-size:clamp(26px,5vw,34px);line-height:1.05;margin:0;text-wrap:balance}
+header p{margin:6px 0 0;color:var(--muted);max-width:62ch}
+.sum{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:18px 0 8px}
+.sum div{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-width:0}
+.sum b{display:block;font-family:var(--f-mono);font-size:20px;font-variant-numeric:tabular-nums;font-weight:500}
+.sum span{font-size:12px;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+.bar{height:8px;background:var(--soft);border:1px solid var(--line);border-radius:99px;overflow:hidden;margin:6px 0 14px}
+.bar i{display:block;height:100%;background:var(--ok);transition:width .3s}
+.tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:6px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:var(--card);border-radius:99px;padding:5px 12px;cursor:pointer;font-size:13.5px}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--card);border-color:var(--ink)}
+.btn{border:1px solid var(--line);background:var(--card);border-radius:8px;padding:7px 12px;cursor:pointer;white-space:nowrap}
+.btn:hover{border-color:var(--muted)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
+.btn.small{padding:4px 9px;font-size:13px}
+.btn.danger{color:#b03a2e}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+h2{font-family:var(--f-display);font-stretch:85%;font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:26px 0 10px;font-weight:650;display:flex;justify-content:space-between;gap:10px}
+h2 small{letter-spacing:0;text-transform:none;font-family:var(--f-mono);font-weight:400}
+.list{display:grid;gap:10px}
+.item{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;display:grid;gap:10px;min-width:0;border-left:4px solid var(--line)}
+.item[data-st="cotizado"]{border-left-color:var(--info)}
+.item[data-st="comprado"]{border-left-color:var(--warn)}
+.item[data-st="instalado"]{border-left-color:var(--ok)}
+.top{display:flex;gap:10px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap}
+.top h3{margin:0;font-size:17px;font-weight:600;line-height:1.25}
+.top .med{font-family:var(--f-mono);font-size:13px;color:var(--muted)}
+.where{font-size:13px;color:var(--muted)}
+.where b{color:var(--ink);font-weight:500}
+.ask{font-size:12px;color:var(--warn);background:var(--warn-soft);border-radius:99px;padding:1px 8px;margin-left:6px;white-space:nowrap}
+.states{display:flex;border:1px solid var(--line);border-radius:99px;overflow:hidden;background:var(--soft);flex-wrap:nowrap}
+.states button{border:0;background:none;padding:5px 10px;font-size:13px;cursor:pointer;color:var(--muted);white-space:nowrap}
+.states button[aria-pressed="true"][data-v="pendiente"]{background:var(--ink);color:var(--card)}
+.states button[aria-pressed="true"][data-v="cotizado"]{background:var(--info-soft);color:var(--info);font-weight:600}
+.states button[aria-pressed="true"][data-v="comprado"]{background:var(--warn-soft);color:var(--warn);font-weight:600}
+.states button[aria-pressed="true"][data-v="instalado"]{background:var(--ok-soft);color:var(--ok);font-weight:600}
+.models{display:grid;gap:6px}
+.model{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;align-items:start;border:1px solid var(--line);border-radius:9px;padding:8px 10px;cursor:pointer;background:var(--soft)}
+.model[aria-checked="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.model input{margin-top:4px;accent-color:var(--accent)}
+.model b{font-weight:600;font-size:14px}
+.model p{grid-column:2;margin:0;font-size:13px;color:var(--muted)}
+.model a{font-size:12.5px;color:var(--accent)}
+.fields{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.fields label{display:grid;gap:3px;font-size:12px;color:var(--muted);min-width:0}
+.fields input,.fields select{width:100%;min-width:0;border:1px solid var(--line);border-radius:7px;background:var(--card);padding:6px 8px;font-size:14px}
+.fields .wide{grid-column:span 2}
+.fields input.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.tip{font-size:13px;color:var(--muted);background:var(--soft);border-radius:8px;padding:8px 10px;margin:0}
+details.more summary{cursor:pointer;color:var(--accent);font-size:13.5px}
+.rolls{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:4px 0}
+.win{border:1px solid var(--line);border-radius:10px;padding:10px;background:var(--soft);display:grid;gap:6px;justify-items:center;text-align:center}
+.win svg{width:100%;max-width:120px;height:auto}
+.win b{font-family:var(--f-mono);font-size:14px}
+.win span{font-size:12px;color:var(--muted)}
+.save{position:fixed;left:0;right:0;bottom:0;padding:10px max(16px,env(safe-area-inset-right,0px)) calc(10px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));background:var(--card);border-top:1px solid var(--line);display:flex;gap:10px;align-items:center;justify-content:space-between;z-index:5;box-shadow:0 -6px 20px rgba(0,0,0,.08)}
+.save p{margin:0;font-size:14px}
+.note{font-size:13px;color:var(--muted)}
+textarea{width:100%;min-height:120px;border:1px solid var(--line);border-radius:8px;background:var(--card);padding:8px;font-family:var(--f-mono);font-size:12.5px}
+.add{display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:8px;align-items:end}
+.add label{display:grid;gap:3px;font-size:12px;color:var(--muted);min-width:0}
+.add input,.add select{width:100%;min-width:0;border:1px solid var(--line);border-radius:7px;background:var(--card);padding:6px 8px}
+@media (max-width:720px){
+  .fields{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .rolls{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .add{grid-template-columns:1fr 1fr}
+  .add label:first-child{grid-column:span 2}
+}
+@media (max-width:420px){.sum b{font-size:17px}.states button{padding:5px 7px;font-size:12.5px}}
+@media (prefers-reduced-motion: reduce){.bar i{transition:none}}
+</style>
+
+<div class="wrap" id="app"><p class="note">Cargando la lista…</p></div>
+
+<script id="estado" type="application/json">{"v":1,"items":[
+{"id":"roller-1","nombre":"Cortina roller 1","cat":"Cortinas roller","cant":1,"medida":"1.10 × 1.25 m","ubic":"Dormitorio principal","ubicOk":false,"estado":"pendiente","precio":"","tienda":"","nota":"","sel":0,"roller":{"w":1.10,"h":1.25},"modelos":[
+ {"n":"Roller blackout","d":"Oscurece por completo. Ideal para dormitorios. Tela con base PVC, fácil de limpiar."},
+ {"n":"Roller dúo / zebra","d":"Franjas alternas de tela y velo: regulas la luz sin enrollar toda la cortina."},
+ {"n":"Roller screen 5 %","d":"Filtra el sol y deja ver hacia afuera de día. No da privacidad de noche."}]},
+{"id":"roller-2","nombre":"Cortina roller 2","cat":"Cortinas roller","cant":1,"medida":"1.00 × 1.25 m","ubic":"Dormitorio 2","ubicOk":false,"estado":"pendiente","precio":"","tienda":"","nota":"","sel":0,"roller":{"w":1.00,"h":1.25},"modelos":[
+ {"n":"Roller blackout","d":"Oscurece por completo. Ideal para dormitorios. Tela con base PVC, fácil de limpiar."},
+ {"n":"Roller dúo / zebra","d":"Franjas alternas de tela y velo: regulas la luz sin enrollar toda la cortina."},
+ {"n":"Roller screen 5 %","d":"Filtra el sol y deja ver hacia afuera de día. No da privacidad de noche."}]},
+{"id":"roller-3","nombre":"Cortina roller 3","cat":"Cortinas roller","cant":1,"medida":"1.00 × 1.25 m","ubic":"Cuarto de trabajo","ubicOk":false,"estado":"pendiente","precio":"","tienda":"","nota":"","sel":1,"roller":{"w":1.00,"h":1.25},"modelos":[
+ {"n":"Roller blackout","d":"Oscurece por completo. Útil si usas pantallas o proyector."},
+ {"n":"Roller dúo / zebra","d":"Regulas la luz para trabajar sin reflejos en el monitor."},
+ {"n":"Roller screen 5 %","d":"Filtra el sol y deja ver hacia afuera de día. No da privacidad de noche."}]},
+{"id":"roller-4","nombre":"Cortina roller 4","cat":"Cortinas roller","cant":1,"medida":"0.95 × 1.25 m","ubic":"Cocina","ubicOk":false,"estado":"pendiente","precio":"","tienda":"","nota":"","sel":0,"roller":{"w":0.95,"h":1.25},"modelos":[
+ {"n":"Roller screen 5 % en PVC","d":"Tela técnica lavable, resiste grasa y vapor. Deja pasar luz natural a la cocina."},
+ {"n":"Roller blackout PVC","d":"Si la ventana da a otra vivienda y quieres privacidad total."}]},
+{"id":"cortina-mampara","nombre":"Cortina para la mampara","cat":"Sala y comedor","cant":1,"medida":"2.70 m de ancho","ubic":"Sala – comedor","ubicOk":false,"estado":"pendiente","precio":"","tienda":"","nota":"Confirma el alto: del riel o cajón al piso.","sel":0,"modelos":[
+ {"n":"Roller dúo / zebra de 2.70 m","d":"Una sola pieza o dos de 1.35 m (más livianas y no tapan el paso al balcón si abres solo una)."},
+ {"n":"Cortina de tela en riel (velo + blackout)","d":"Doble riel: velo de lino para el día y blackout para la noche. Se recoge a un lado de la mampara."},
+ {"n":"Roller screen 5 % de 2.70 m","d":"Filtra el sol de la tarde sin perder la vista hacia afuera."}]},
+{"id":"centro-ent","nombre":"Centro de entretenimiento flotante","cat":"Sala y comedor","cant":1,"medida":"para TV de 85″ · 1.80–2.00 m de ancho","ubic":"Sala – comedor","ubicOk":true,"estado":"pendiente","precio":"","tienda":"","nota":"La pared de la TV mide unos 2.40 m entre la mampara y el muro del dormitorio 3.","sel":0,"modelos":[
+ {"n":"Rack flotante de 1.80 m con 2–3 puertas abatibles","d":"Melamine de 18 mm, tapa con ranura para cables y tira LED. Se fija a la pared con rieles."},
+ {"n":"Panel de pared + rack flotante de 2.00 m","d":"El panel oculta los cables y soporta la TV; repisas laterales para parlantes o decoración."},
+ {"n":"Rack flotante de 1.60 m en madera y negro","d":"Más angosto si prefieres dejar espacio a los candelabros de piso."}]},
+{"id":"ropero","nombre":"Ropero","cat":"Dormitorios","cant":1,"medida":"2.00 m (confirma si es de alto o de ancho)","ubic":"Dormitorio 2","ubicOk":false,"estado":"pendiente","precio":"","tienda":"","nota":"","sel":0,"modelos":[
+ {"n":"Ropero de 2 puertas corredizas, 2.00 m de alto × 1.40 m de ancho","d":"Melamine, barra para colgar, maletero arriba y cajonera. Las corredizas no chocan con las camas."},
+ {"n":"Ropero de 3 puertas batientes, 2.00 m de alto × 1.20 m","d":"Más económico; necesita unos 50 cm libres delante para abrir las puertas."},
+ {"n":"Ropero de 2.00 m de ancho y 4 puertas","d":"Solo si va en una pared libre de 2 m; en el dormitorio 2 no entra frente a las camas."}]},
+{"id":"mampara-1","nombre":"Mampara de ducha","cat":"Baños","cant":1,"medida":"88 cm × 1.80 m","ubic":"Baño 1 (principal)","ubicOk":false,"estado":"pendiente","precio":"","tienda":"","nota":"","sel":0,"modelos":[
+ {"n":"Panel fijo de vidrio templado 8 mm","d":"Herrajes de acero inoxidable al piso y a la pared, con barra estabilizadora. Sin perfiles, fácil de limpiar."},
+ {"n":"Puerta batiente de templado 8 mm","d":"Bisagras vidrio–pared y jalador. Pide que abra hacia afuera de la ducha."},
+ {"n":"Corrediza con perfil de aluminio","d":"Ocupa menos espacio al abrir; más perfiles que limpiar."}]},
+{"id":"mampara-2","nombre":"Mampara de ducha","cat":"Baños","cant":1,"medida":"82.5 cm × 1.80 m","ubic":"Baño 2 (secundario)","ubicOk":false,"estado":"pendiente","precio":"","tienda":"","nota":"","sel":0,"modelos":[
+ {"n":"Panel fijo de vidrio templado 8 mm","d":"Herrajes de acero inoxidable al piso y a la pared, con barra estabilizadora."},
+ {"n":"Puerta batiente de templado 8 mm","d":"Bisagras vidrio–pared y jalador. Pide que abra hacia afuera de la ducha."},
+ {"n":"Corrediza con perfil de aluminio","d":"Ocupa menos espacio al abrir; más perfiles que limpiar."}]},
+{"id":"repisa-espejo","nombre":"Repisa con espejo","cat":"Baños","cant":1,"medida":"60 cm de ancho × 70–80 cm de alto","ubic":"Baño 3 (servicio)","ubicOk":false,"estado":"pendiente","precio":"","tienda":"","nota":"","sel":0,"modelos":[
+ {"n":"Botiquín con espejo y 2 repisas internas","d":"Melamine hidrófugo, puerta con espejo. Guarda cepillos y medicinas."},
+ {"n":"Espejo con repisa inferior de vidrio","d":"Espejo biselado de 60 × 75 cm y repisa de vidrio templado con soportes cromados."},
+ {"n":"Espejo LED con repisa","d":"Luz frontal integrada; necesita un punto eléctrico cerca."}]},
+{"id":"terma","nombre":"Terma a gas","cat":"Lavandería","cant":1,"medida":"10–12 L/min","ubic":"Lavandería","ubicOk":true,"estado":"pendiente","precio":"","tienda":"","nota":"El anexo de acabados indica conexión a gas para terma en la lavandería.","sel":0,"modelos":[
+ {"n":"Terma instantánea a gas de 10 L/min, tiro forzado","d":"Suficiente para una ducha a la vez. El tiro forzado expulsa los gases con ventilador: más segura en ambientes interiores."},
+ {"n":"Terma instantánea a gas de 12 L/min, tiro forzado","d":"Alcanza para dos duchas a la vez o ducha y lavadero."},
+ {"n":"Terma a gas de tiro natural","d":"Más barata, pero requiere un ducto de salida directo al exterior; consulta si tu lavandería lo permite."}],
+ "tip":"Antes de comprar confirma si el edificio tiene gas natural o GLP: cada terma viene para uno u otro. La instalación debe hacerla un técnico autorizado."},
+{"id":"tendedero","nombre":"Tendedero colgante","cat":"Lavandería","cant":1,"medida":"1.20–1.50 m de largo","ubic":"Lavandería","ubicOk":true,"estado":"pendiente","precio":"","tienda":"","nota":"","sel":0,"modelos":[
+ {"n":"Tendedero de techo con poleas, 5–6 varillas de aluminio","d":"Sube y baja con cuerda; aprovecha la altura sin ocupar piso."},
+ {"n":"Tendedero de pared retráctil","d":"Cuerdas que se recogen en una caja; útil si el techo no permite anclajes."},
+ {"n":"Tendedero colgante de ganchos (pulpo)","d":"Para medias y ropa interior; se cuelga del tendedero principal."}]},
+{"id":"escurridor","nombre":"Escurridor de platos pequeño","cat":"Cocina","cant":1,"medida":"50 × 50 cm","ubic":"Cocina","ubicOk":true,"estado":"pendiente","precio":"","tienda":"","nota":"","sel":0,"modelos":[
+ {"n":"Escurridor de 2 niveles en acero inoxidable","d":"Bandeja recolectora y portacubiertos. Aprovecha la altura en un tablero corto."},
+ {"n":"Escurridor sobre la poza, extensible","d":"Se apoya sobre el lavadero y no ocupa tablero."},
+ {"n":"Escurridor enrollable de silicona y acero","d":"Se enrolla y se guarda cuando no lo usas."}]},
+{"id":"taladro","nombre":"Taladro percutor y destornillador","cat":"Herramientas","cant":1,"medida":"","ubic":"Depósito","ubicOk":true,"estado":"pendiente","precio":"","tienda":"","nota":"Para instalar rollers, repisas y el centro de entretenimiento necesitas percutor: las paredes son de concreto o ladrillo.","sel":0,"modelos":[
+ {"n":"Combo inalámbrico 20 V: taladro percutor + atornillador de impacto","d":"Dos baterías y cargador. Lo más práctico para armar muebles y perforar concreto. Marcas comunes: DeWalt, Bosch, Makita, Black+Decker."},
+ {"n":"Taladro percutor con cable de 650–750 W + destornillador inalámbrico de 3.6 V","d":"Más fuerza por menos dinero; el destornillador pequeño sirve para armar muebles."},
+ {"n":"Taladro percutor inalámbrico 12 V","d":"Ligero; perfora ladrillo y concreto liviano, pero se queda corto en concreto armado."}],
+ "tip":"Agrega un juego de brocas para concreto (6, 8 y 10 mm), tarugos y un nivel."},
+{"id":"trapeador","nombre":"Trapeador","cat":"Limpieza","cant":1,"medida":"","ubic":"Depósito","ubicOk":true,"estado":"pendiente","precio":"","tienda":"","nota":"","sel":0,"modelos":[
+ {"n":"Trapeador giratorio con balde centrifugador","d":"Escurre con el pedal o girando; repuestos de microfibra."},
+ {"n":"Trapeador plano de microfibra con atomizador","d":"Ideal para piso laminado: usa poca agua y no lo hincha."}],
+ "tip":"Para el piso laminado usa el trapeador casi seco; el exceso de agua daña las uniones."},
+{"id":"secadores","nombre":"Secadores","cat":"Limpieza","cant":1,"medida":"","ubic":"Depósito","ubicOk":false,"estado":"pendiente","precio":"","tienda":"","nota":"","sel":0,"modelos":[
+ {"n":"Jalador de agua para piso, 40–45 cm","d":"Para los baños, el balcón y la lavandería. Mango de aluminio."},
+ {"n":"Paños secadores de microfibra para cocina (pack)","d":"Absorbentes y de secado rápido."},
+ {"n":"Secador de pelo","d":"Si te referías a eso: busca 2000 W con difusor."}],
+ "tip":"Elige el modelo que corresponda a lo que tenías en mente."}
+]}</script>
+
+<script id="principal">
+(function(){
+'use strict';
+const ROOMS = ['Sala – comedor','Dormitorio principal','Dormitorio 2','Cuarto de trabajo','Cocina','Lavandería','Depósito','Baño 1 (principal)','Baño 2 (secundario)','Baño 3 (servicio)','Balcón','Por definir'];
+const STATES = [['pendiente','Pendiente'],['cotizado','Cotizado'],['comprado','Comprado'],['instalado','Instalado']];
+const ORDER = ['Cortinas roller','Sala y comedor','Dormitorios','Baños','Cocina','Lavandería','Herramientas','Limpieza','Otros'];
+const LS = 'compras-1508-local';
+const $ = s => document.querySelector(s);
+const app = $('#app');
+let S = JSON.parse(document.getElementById('estado').textContent);
+let filter = 'todos', dirty = false, canPublish = null, artifact = null, saving = false, autoT = 0;
+try { const pend = sessionStorage.getItem(LS + '-pend'); if (pend){ sessionStorage.removeItem(LS + '-pend'); } } catch (e) {}
+
+function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
+function money(n){ return 'S/ ' + n.toLocaleString('es-PE', { minimumFractionDigits: 0, maximumFractionDigits: 2 }); }
+function num(v){ const n = parseFloat(String(v).replace(',', '.')); return isFinite(n) ? n : 0; }
+function q(text){ return 'https://www.google.com/search?q=' + encodeURIComponent(text + ' Perú'); }
+
+function winSvg(w, h){
+  const W = 100, k = W / 1.2, rw = w * k, rh = h * k;
+  return `<svg viewBox="0 0 ${W + 4} ${1.3 * k + 4}" role="img" aria-label="Ventana de ${w.toFixed(2)} por ${h.toFixed(2)} metros"><rect x="2" y="2" width="${rw}" height="${rh}" fill="none" stroke="currentColor" stroke-opacity=".5" stroke-width="1.5"/><rect x="2" y="2" width="${rw}" height="${rh * 0.55}" fill="var(--accent)" fill-opacity=".28"/><rect x="2" y="2" width="${rw}" height="5" fill="var(--accent)"/></svg>`;
+}
+
+function render(){
+  const items = S.items;
+  const done = items.filter(i => i.estado === 'comprado' || i.estado === 'instalado').length;
+  const spent = items.reduce((a, i) => a + ((i.estado === 'comprado' || i.estado === 'instalado') ? num(i.precio) * (i.cant || 1) : 0), 0);
+  const quoted = items.reduce((a, i) => a + (i.estado === 'cotizado' ? num(i.precio) * (i.cant || 1) : 0), 0);
+  const unsure = items.filter(i => !i.ubicOk).length;
+  let h = `<header><h1>Compras del departamento 1508</h1><p>Marca cada artículo según avances: pendiente, cotizado, comprado o instalado. Los modelos son tentativos; elige uno y anota el precio y la tienda cuando lo tengas.</p></header>`;
+  h += `<div class="sum"><div><b>${done}/${items.length}</b><span>Comprados</span></div><div><b>${money(spent)}</b><span>Gastado</span></div><div><b>${money(quoted)}</b><span>Cotizado por comprar</span></div></div>`;
+  h += `<div class="bar" aria-hidden="true"><i style="width:${items.length ? done / items.length * 100 : 0}%"></i></div>`;
+  h += `<div class="tools"><div class="chips" role="group" aria-label="Filtrar">${[['todos','Todos'],['pendiente','Pendientes'],['cotizado','Cotizados'],['comprado','Comprados'],['instalado','Instalados'],['ubic','Ubicación por confirmar (' + unsure + ')']].map(([k, l]) => `<button class="chip" data-f="${k}" aria-pressed="${filter === k}">${l}</button>`).join('')}</div></div>`;
+
+  const groups = {};
+  for (const it of items){ const g = ORDER.includes(it.cat) ? it.cat : 'Otros'; (groups[g] = groups[g] || []).push(it); }
+  for (const g of ORDER){
+    const L = (groups[g] || []).filter(i => filter === 'todos' || (filter === 'ubic' ? !i.ubicOk : i.estado === filter));
+    if (!L.length) continue;
+    const gDone = (groups[g] || []).filter(i => i.estado === 'comprado' || i.estado === 'instalado').length;
+    h += `<h2>${esc(g)}<small>${gDone}/${groups[g].length}</small></h2>`;
+    if (g === 'Cortinas roller' && filter === 'todos'){
+      h += `<p class="tip">Cuatro ventanas con cortina roller, todas de 1.25 m de alto. La ventana de la lavandería queda sin cortina. Confirma con el proveedor si las medidas son del vano (cortina por dentro: suele fabricarse 1 cm menos de ancho) o si la cortina irá por fuera del vano (suma 5–10 cm por lado).</p>`;
+      h += `<div class="rolls">${groups[g].map(i => `<div class="win">${winSvg(i.roller.w, i.roller.h)}<b>${i.roller.w.toFixed(2)} × ${i.roller.h.toFixed(2)}</b><span>${esc(i.ubic)} · ${(i.roller.w * i.roller.h).toFixed(2)} m²</span></div>`).join('')}</div>`;
+    }
+    h += `<div class="list">${L.map(card).join('')}</div>`;
+  }
+  if (!items.some(i => filter === 'todos' || (filter === 'ubic' ? !i.ubicOk : i.estado === filter))) h += `<p class="note" style="margin-top:20px">No hay artículos en este filtro.</p>`;
+
+  h += `<h2>Agregar artículo</h2><form class="add" id="addForm"><label>Nombre<input id="aNom" required placeholder="Ej.: Tacho de basura de cocina"></label><label>Ambiente<select id="aUb">${ROOMS.map(r => `<option>${esc(r)}</option>`).join('')}</select></label><label>Medida<input id="aMed" placeholder="Opcional"></label><button class="btn primary" type="submit">Agregar</button></form>`;
+  h += `<h2>Compartir</h2><p class="note">Copia la lista en texto para enviarla por WhatsApp o llevarla a la tienda.</p><div class="tools"><button class="btn" id="copy">Copiar lista pendiente</button></div><textarea id="out" hidden readonly></textarea>`;
+  h += `<div class="save" id="saveBar" ${dirty ? '' : 'hidden'}><p id="saveMsg">${saveText()}</p><button class="btn primary" id="saveBtn" ${saving ? 'disabled' : ''}>Guardar ahora</button></div>`;
+  app.innerHTML = h;
+  bind();
+}
+
+function card(it){
+  const sel = it.modelos && it.modelos[it.sel];
+  let h = `<article class="item" data-st="${it.estado}" data-id="${it.id}">`;
+  h += `<div class="top"><div><h3>${esc(it.nombre)}${it.cant > 1 ? ' ×' + it.cant : ''}</h3>${it.medida ? `<div class="med">${esc(it.medida)}</div>` : ''}<div class="where">Ubicación: <b>${esc(it.ubic)}</b>${it.ubicOk ? '' : '<span class="ask">por confirmar</span>'}</div></div>`;
+  h += `<div class="states" role="group" aria-label="Estado de ${esc(it.nombre)}">${STATES.map(([v, l]) => `<button data-st="${v}" data-v="${v}" aria-pressed="${it.estado === v}">${l}</button>`).join('')}</div></div>`;
+  if (it.modelos && it.modelos.length){
+    h += `<details class="more" ${it.estado === 'pendiente' || it.estado === 'cotizado' ? 'open' : ''}><summary>Modelo elegido: ${esc(sel ? sel.n : '—')}</summary><div class="models" role="radiogroup" aria-label="Modelos tentativos" style="margin-top:8px">`;
+    it.modelos.forEach((m, k) => {
+      h += `<label class="model" aria-checked="${k === it.sel}"><input type="radio" name="m-${it.id}" value="${k}" ${k === it.sel ? 'checked' : ''} data-m="${k}"><b>${esc(m.n)}</b><p>${esc(m.d)} <a href="${q(m.n + ' ' + (it.medida || ''))}" target="_blank" rel="noopener">Buscar precios</a></p></label>`;
+    });
+    h += `</div></details>`;
+  }
+  if (it.tip) h += `<p class="tip">${esc(it.tip)}</p>`;
+  h += `<div class="fields">`;
+  h += `<label>Ubicación<select data-k="ubic">${ROOMS.map(r => `<option ${r === it.ubic ? 'selected' : ''}>${esc(r)}</option>`).join('')}</select></label>`;
+  h += `<label>Cantidad<input class="num" type="number" min="1" step="1" inputmode="numeric" data-k="cant" value="${it.cant || 1}"></label>`;
+  h += `<label>Precio unitario (S/)<input class="num" type="text" inputmode="decimal" data-k="precio" value="${esc(it.precio)}" placeholder="0.00"></label>`;
+  h += `<label>Tienda<input type="text" data-k="tienda" value="${esc(it.tienda)}" placeholder="Ej.: Sodimac"></label>`;
+  h += `<label class="wide">Nota<input type="text" data-k="nota" value="${esc(it.nota)}" placeholder="Medida exacta, color, fecha de instalación…"></label>`;
+  if (it.roller){
+    h += `<label>Ancho (m)<input class="num" type="text" inputmode="decimal" data-r="w" value="${it.roller.w}"></label><label>Alto (m)<input class="num" type="text" inputmode="decimal" data-r="h" value="${it.roller.h}"></label>`;
+  } else h += `<label>Medida<input type="text" data-k="medida" value="${esc(it.medida)}"></label><span></span>`;
+  h += `</div>`;
+  if (it.custom) h += `<div><button class="btn small danger" data-del="1">Quitar de la lista</button></div>`;
+  return h + `</article>`;
+}
+
+function saveText(){
+  if (saving) return 'Guardando…';
+  if (canPublish === false) return 'Cambios guardados solo en este navegador (esta vista no puede editar la lista compartida).';
+  return 'Tienes cambios sin guardar. Se guardan solos en unos segundos.';
+}
+function touch(rerender = true){
+  dirty = true;
+  try { localStorage.setItem(LS, JSON.stringify(S)); } catch (e) {}
+  if (rerender) render(); else { const b = $('#saveBar'); if (b){ b.hidden = false; $('#saveMsg').textContent = saveText(); } }
+  clearTimeout(autoT);
+  if (canPublish !== false) autoT = setTimeout(() => { const a = document.activeElement; if (a && /INPUT|SELECT|TEXTAREA/.test(a.tagName)) { autoT = setTimeout(() => save(), 4000); return; } save(); }, 5000);
+}
+
+function bind(){
+  app.querySelectorAll('[data-f]').forEach(b => b.onclick = () => { filter = b.dataset.f; render(); });
+  app.querySelectorAll('article.item').forEach(el => {
+    const it = S.items.find(i => i.id === el.dataset.id); if (!it) return;
+    el.querySelectorAll('.states button').forEach(b => b.onclick = () => { it.estado = b.dataset.st; touch(); });
+    el.querySelectorAll('[data-m]').forEach(r => r.onchange = () => { it.sel = +r.dataset.m; touch(); });
+    el.querySelectorAll('[data-k]').forEach(inp => {
+      const k = inp.dataset.k;
+      const evt = inp.tagName === 'SELECT' ? 'change' : 'input';
+      inp.addEventListener(evt, () => {
+        if (k === 'cant') it.cant = Math.max(1, parseInt(inp.value, 10) || 1);
+        else it[k] = inp.value;
+        if (k === 'ubic'){ it.ubicOk = true; touch(); } else touch(false);
+      });
+      if (evt === 'input') inp.addEventListener('change', () => render());
+    });
+    el.querySelectorAll('[data-r]').forEach(inp => {
+      inp.addEventListener('input', () => { const v = num(inp.value); if (v > 0){ it.roller[inp.dataset.r] = v; it.medida = it.roller.w.toFixed(2) + ' × ' + it.roller.h.toFixed(2) + ' m'; touch(false); } });
+      inp.addEventListener('change', () => render());
+    });
+    const del = el.querySelector('[data-del]');
+    if (del) del.onclick = () => { if (del.dataset.armed){ S.items = S.items.filter(i => i !== it); touch(); } else { del.dataset.armed = '1'; del.textContent = 'Toca otra vez para quitar'; setTimeout(() => { if (del.isConnected){ delete del.dataset.armed; del.textContent = 'Quitar de la lista'; } }, 3000); } };
+  });
+  $('#addForm').onsubmit = e => {
+    e.preventDefault();
+    const n = $('#aNom').value.trim(); if (!n) return;
+    const ub = $('#aUb').value;
+    const cat = { 'Sala – comedor': 'Sala y comedor', 'Dormitorio principal': 'Dormitorios', 'Dormitorio 2': 'Dormitorios', 'Cuarto de trabajo': 'Dormitorios', 'Cocina': 'Cocina', 'Lavandería': 'Lavandería', 'Baño 1 (principal)': 'Baños', 'Baño 2 (secundario)': 'Baños', 'Baño 3 (servicio)': 'Baños' }[ub] || 'Otros';
+    S.items.push({ id: 'c' + Date.now().toString(36), nombre: n, cat, cant: 1, medida: $('#aMed').value.trim(), ubic: ub, ubicOk: ub !== 'Por definir', estado: 'pendiente', precio: '', tienda: '', nota: '', sel: 0, modelos: [], custom: true });
+    touch();
+  };
+  $('#copy').onclick = () => {
+    const lines = ['Compras Dpto. 1508 – pendientes', ''];
+    for (const it of S.items) if (it.estado === 'pendiente' || it.estado === 'cotizado'){
+      const m = it.modelos && it.modelos[it.sel];
+      lines.push(`• ${it.nombre}${it.cant > 1 ? ' ×' + it.cant : ''}${it.medida ? ' (' + it.medida + ')' : ''} – ${it.ubic}${m ? '\n  ' + m.n : ''}${it.precio ? '\n  Cotizado: S/ ' + it.precio + (it.tienda ? ' en ' + it.tienda : '') : ''}`);
+    }
+    const t = lines.join('\n'), out = $('#out');
+    const fallback = () => { out.hidden = false; out.value = t; out.select(); };
+    try { navigator.clipboard.writeText(t).then(() => { $('#copy').textContent = 'Lista copiada'; }, fallback); } catch (e) { fallback(); }
+  };
+  const sb = $('#saveBtn'); if (sb) sb.onclick = () => save();
+}
+
+const SKELETON = '<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,-apple-system,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style></head><body>';
+function documentFromState(){
+  const head = '<title>Compras Dpto. 1508</title>\n<meta name="claude:viewport-fit-sides" content="cover">\n' +
+    '<link rel="preconnect" href="https://fonts.googleapis.com">\n<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n' +
+    '<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..100,500..800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">\n';
+  const css = document.getElementById('estilos').textContent;
+  const js = document.getElementById('principal').textContent;
+  const data = JSON.stringify(S).replace(/</g, '\\u003c');
+  return SKELETON + head + '<style id="estilos">' + css + '</style>\n\n<div class="wrap" id="app"><p class="note">Cargando la lista…</p></div>\n\n<script id="estado" type="application/json">' + data + '<\/script>\n\n<script id="principal">' + js + '<\/script>\n</body></html>';
+}
+async function save(){
+  clearTimeout(autoT);
+  if (!dirty || saving) return;
+  if (!artifact || canPublish === false){ dirty = false; render(); return; }
+  saving = true; render();
+  try { sessionStorage.setItem(LS + '-pend', '1'); } catch (e) {}
+  try {
+    await artifact.publish(documentFromState());
+    try { localStorage.removeItem(LS); } catch (e) {}
+    dirty = false;
+  } catch (err){
+    const code = err && err.code;
+    if (code === 'conflict'){ /* la vista se recarga con la versión más reciente */ }
+    else if (['not_writer', 'not_granted', 'not_declared', 'consent_required', 'capability_disabled', 'capability_removed'].includes(code)){ canPublish = false; }
+    else if (code === 'rate_limited'){ autoT = setTimeout(save, 20000); }
+    else { autoT = setTimeout(save, 8000 + Math.random() * 4000); }
+  }
+  saving = false; render();
+}
+
+// Si esta vista no puede guardar, recupera lo que se guardó localmente.
+function restoreLocal(){ try { const l = JSON.parse(localStorage.getItem(LS) || 'null'); if (l && Array.isArray(l.items)){ S = l; dirty = true; } } catch (e) {} }
+
+render();
+(async () => {
+  try { artifact = window.claude && window.claude.use ? await window.claude.use('artifact') : null; } catch (e) { artifact = null; }
+  if (!artifact){ canPublish = false; restoreLocal(); render(); return; }
+  canPublish = true;
+})();
+})();
+</script>
